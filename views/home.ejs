@@ -1,0 +1,135 @@
+<%- include('partials/header') %>
+
+
+  <!-- Section Title -->
+  <section id="title-sec" class="title-sec color1-sec">
+    <div class="container-fluid title-div-left">
+
+      <!-- Nav Bar -->
+      <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="">
+          <img class="brand-img" src="images/salimpic.png" alt="Salim Rostami">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#testimonial-sec">Leaderboard</a>
+            </li>
+            <!-- <li class="nav-item">
+              <a class="nav-link" href="#material-sec">Content</a>
+            </li> -->
+            <li class="nav-item">
+              <a class="nav-link" href="#contact-sec">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Title -->
+      <div class="row">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+          <h1 class="title-head big-head">Project <br>Management</h1>
+          <h3 class="title-subhead">Planning, execution, control</h3>
+          <div class="btn-group title-btn-div">
+            <button type="button" class="btn btn-outline-light btn-lg title-btn"><i class="fa-solid fa-play"></i> Intro</button>
+            <form action="/register" method="get">
+              <button type="submit" class="btn btn-outline-light btn-lg title-btn"><i class="fa-solid fa-user"></i> Register</button>
+            </form>
+            <form action="/login" method="get">
+              <button type="submit" class="btn btn-outline-light btn-lg title-btn"><i class="fa-solid fa-right-to-bracket"></i> Access</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12 title-img-div">
+          <img class="title-img" src="images/pm2.png" alt="project-management">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- Features -->
+  <section id="features-sec" class="features-sec white-sec">
+    <div class="container-fluid">
+      <div class="row">
+
+        <div class="col-lg-4 col-md-12 col-sm-12 features-box">
+          <i class="fa-solid fa-calculator fa-3x features-icons icn-color"></i><br>
+          <h3 class="features-head">Quantitative</h3>
+          <p class="dimmed-text">We focus on methods and formulas, as well as definitions.</p>
+        </div>
+
+        <div class="col-lg-4 col-md-12 col-sm-12 features-box">
+          <i class="fa-solid fa-bullseye fa-3x features-icons icn-color"></i><br>
+          <h3 class="features-head">Tailored</h3>
+          <p class="dimmed-text">Modified based on the needs of different audiences/programs.</p>
+        </div>
+
+        <div class="col-lg-4 col-md-12 col-sm-12 features-box">
+          <i class="fa-solid fa-computer-mouse fa-3x features-icons icn-color"></i><br>
+          <h3 class="features-head">Computerized</h3>
+          <p class="dimmed-text">Software automate and facilitate project management.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- testimonial -->
+  <section id="testimonial-sec" class="testimonial-sec color2-sec">
+
+    <!-- <h2 class="sec-head">Course Material</h2>
+    <p class="dimmed-text"> Everything you need for this course is here. No handbooks required! </p> -->
+
+    <div id="carouseltestimonial" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" pause="hover">
+      <div class="carousel-inner">
+        <div class="carousel-item active container-fluid">
+          <h2 class="testimonial-text">Salim doesn't know what he's talking about... We want Porfessor Sarkozy!</h2>
+          <img class="testimonial-image" src="images/stefanpic.png" alt="dog-profile">
+          <em>Jeff, Arschot</em>
+        </div>
+        <div class="carousel-item container-fluid">
+          <h2 class="testimonial-text">Stefan is a clown, but so are most professors! At least, he's easy to look at...</h2>
+          <img class="testimonial-image" src="images/lady-img.jpg" alt="lady-profile">
+          <em>Beverly, Paris</em>
+        </div>
+      </div>
+
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouseltestimonial" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouseltestimonial" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+
+  </section>
+
+
+  <!-- Press -->
+  <section id="press-sec" class="press-sec color2-sec">
+    <img class="press-img" src="images/ieseglogo.png" alt="IESEG-logo">
+    <img class="press-img" src="images/tnw.png" alt="tnw-logo">
+    <img class="press-img" src="images/bizinsider.png" alt="biz-insider-logo">
+    <img class="press-img" src="images/mashable.png" alt="mashable-logo">
+  </section>
+
+
+  <!-- Contact Section -->
+  <section id="contact-sec" class="contact-sec color1-sec">
+    <div class="container-fluid">
+      <h2 class="sec-head">Help us improve with your anonymous feedback!</h2>
+      <button type="button" class="btn btn-outline-light btn-lg contact-btn"><i class="fa-solid fa-envelope"></i> Contact Us</button>
+    </div>
+  </section>
+
+
+<%- include('partials/footer') %>
