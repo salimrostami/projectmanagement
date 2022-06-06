@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const session = require('express-session')
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
+const cpm = require(__dirname + "/cpm.js");
 
 //Set up the app
 const app = express();
@@ -34,6 +35,20 @@ async function main() {
 const studentSchema = new mongoose.Schema({
   email: String,
   password: String,
+});
+const activitySchema = new mongoose.Schema({
+  index: Number,
+  name: String,
+  duration: Number
+});
+const precedenceSchema = new mongoose.Schema({
+  from: Number,
+  to: Number
+});
+const projectSchema = new mongoose.Schema({
+  index: Number,
+  activities: [activitySchema],
+  precedences: [precedenceSchema]
 });
 
 // Modify the schema to use encryption/hashin strategies
@@ -90,6 +105,17 @@ app.get("/logout", function(req, res){
       res.redirect("/");
     }
   });
+});
+
+app.get("/cpm-exercise", function(req, res){
+  cpm();
+  res.render("cpm");
+
+  // if (req.isAuthenticated()) {
+  //
+  // } else {
+  //   res.redirect("/login");
+  // }
 });
 
 //Set up POST routes
