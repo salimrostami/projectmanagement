@@ -1,397 +1,94 @@
-<%- include('partials/header') %>
+<%- include('partials/logHeader') %>
+<section class="cpm-exe-sec color2-sec">
+  <h2 class="sec-head">CPM Exercise</h2>
+  <div class="container-fluid">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Activity</th>
+          <th scope="col">Duration</th>
+          <th scope="col">Predecessors</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < proj.size; i++) { %>
+          <tr>
+            <th scope="row"><%=i+1%></th>
+            <td><%=proj.activities[i]%></td>
+            <td><%=proj.durations[i]%></td>
+            <td><%=proj.predNames[i]%></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
 
-<section id="material-sec" class="material-sec white-sec">
+<section class="cpm-sol-sec color3-sec">
+  <h2 class="sec-head">CPM Solution</h2>
+  <div class="container-fluid">
 
-  <h2 class="sec-head">Course Content</h2>
-  <p class="dimmed-text"> Fully online — Instant feedback — Sustainable — Covid-safe </p>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Activity</th>
+          <th scope="col">EST</th>
+          <th scope="col">EFT</th>
+          <th scope="col">LST</th>
+          <th scope="col">LFT</th>
+          <th scope="col">Floats</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < proj.size; i++) { %>
+          <tr>
+            <th scope="row"><%=i+1%></th>
+            <td><%=proj.activities[i]%></td>
+            <td><%=proj.es[i]%></td>
+            <td><%=proj.ef[i]%></td>
+            <td><%=proj.ls[i]%></td>
+            <td><%=proj.lf[i]%></td>
+            <td><%=proj.floats[i]%></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
 
-  <div class="accordion accordion-flush material-flush-div" id="accordionFlushExample">
+    <table class="table table-hover table-cpm">
+      <thead>
+        <tr>
+          <th scope="col">Project Duration (=max(EFT) or max(LFT))</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><%=proj.makespan%></td>
+        </tr>
+      </tbody>
+    </table>
 
-    <div class="accordion-item">
-      <h3 class="accordion-header" id="flush-heading1">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse1" aria-expanded="false" aria-controls="flush-collapse1">
-          Basics of Project Management
-        </button>
-      </h3>
-      <div id="flush-collapse1" class="accordion-collapse collapse" aria-labelledby="flush-heading1" data-bs-parent="#accordionFlushExample">
-        <div class="accordion-body">
-
-          <div class="row">
-
-            <div class="material-col col-lg-8 col-md-6 material-col-text">
-              <p class="normal-text">Definitions - Scheduling - Critical path method (CPM)</p>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-file-powerpoint"></i> Slides
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Full Slides</a></li>
-                  <li><a class="dropdown-item" href="#">Handout Slides</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-book-open"></i> Extras
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Text: Why PM</a></li>
-                  <li><a class="dropdown-item" href="#">Text: Dynamic scheduling</a></li>
-                  <li><a class="dropdown-item" href="#">Video: Great projects</a></li>
-                  <li><a class="dropdown-item" href="#">Video: Brandenburg airport</a></li>
-                  <li><a class="dropdown-item" href="#">Video: History of PM</a></li>
-                  <li><a class="dropdown-item" href="#">Video: Alton bridge</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button type="button" class="btn btn-outline-dark btn-lg">
-                  <i class="fa-solid fa-video"></i> Recorded Lecture
-                </button>
-              </div>
-
-            </div>
-
-            <div class="material-col col-lg-4 col-md-6">
-              <div class="card">
-                <div class="card-header">
-                  <h4>Exercise CPM</h4>
-                </div>
-                <div class="d-flex flex-column card-body">
-                  <p>Critical Path Method</p>
-                  <p>Graded (7.5%)</p>
-                  <div class="d-grid gap-2 mt-auto">
-                    <a href="/cpm-exercise" class="btn btn-lg btn-block btn-outline-dark">Start</a>
-                    <!-- <button class="btn btn-lg btn-block btn-outline-dark" type="button">Start</button> -->
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="accordion-item">
-      <h3 class="accordion-header" id="flush-heading2">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse2" aria-expanded="false" aria-controls="flush-collapse2">
-          Resource Leveling
-        </button>
-      </h3>
-      <div id="flush-collapse2" class="accordion-collapse collapse" aria-labelledby="flush-heading2" data-bs-parent="#accordionFlushExample">
-        <div class="accordion-body">
-
-          <div class="row">
-
-            <div class="material-col col-lg-8 col-md-6 material-col-text">
-              <p class="normal-text">Resource constraints - Priority rules - Schedule generation schemes</p>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-file-powerpoint"></i> Slides
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Full Slides</a></li>
-                  <li><a class="dropdown-item" href="#">Handout Slides</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-book-open"></i> Extras
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Text 1</a></li>
-                  <li><a class="dropdown-item" href="#">Video 1</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button type="button" class="btn btn-outline-dark btn-lg">
-                  <i class="fa-solid fa-video"></i> Recorded Lecture
-                </button>
-              </div>
-
-            </div>
-
-            <div class="material-col col-lg-4 col-md-6">
-              <div class="card">
-                <div class="card-header">
-                  <h4>Exercise RL</h4>
-                </div>
-                <div class="d-flex flex-column card-body">
-                  <p>Resource Leveling</p>
-                  <p>Graded (10%)</p>
-                  <div class="d-grid gap-2 mt-auto">
-                    <button class="btn btn-lg btn-block btn-outline-dark" type="button">Start</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="accordion-item">
-      <h3 class="accordion-header" id="flush-heading3">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse3" aria-expanded="false" aria-controls="flush-collapse3">
-          Stochastic Durations
-        </button>
-      </h3>
-      <div id="flush-collapse3" class="accordion-collapse collapse" aria-labelledby="flush-heading3" data-bs-parent="#accordionFlushExample">
-        <div class="accordion-body">
-
-          <div class="row">
-
-            <div class="material-col col-lg-8 col-md-6 material-col-text">
-              <p class="normal-text">Uncertainty - Simulation - Program evaluation and review technique (PERT)</p>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-file-powerpoint"></i> Slides
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Full Slides</a></li>
-                  <li><a class="dropdown-item" href="#">Handout Slides</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-book-open"></i> Extras
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Text 1</a></li>
-                  <li><a class="dropdown-item" href="#">Video 1</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button type="button" class="btn btn-outline-dark btn-lg">
-                  <i class="fa-solid fa-video"></i> Recorded Lecture
-                </button>
-              </div>
-
-            </div>
-
-            <div class="material-col col-lg-4 col-md-6">
-              <div class="card">
-                <div class="card-header">
-                  <h4>Exercise PERT</h4>
-                </div>
-                <div class="d-flex flex-column card-body">
-                  <p>Program Evaluation & Review Technique</p>
-                  <p>Graded (5%)</p>
-                  <div class="d-grid gap-2 mt-auto">
-                    <button class="btn btn-lg btn-block btn-outline-dark" type="button">Start</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="accordion-item">
-      <h3 class="accordion-header" id="flush-heading4">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse4" aria-expanded="false" aria-controls="flush-collapse4">
-          Microsoft Project
-        </button>
-      </h3>
-      <div id="flush-collapse4" class="accordion-collapse collapse" aria-labelledby="flush-heading4" data-bs-parent="#accordionFlushExample">
-        <div class="accordion-body">
-
-          <div class="row">
-
-            <div class="material-col col-lg-8 col-md-6 material-col-text">
-              <p class="normal-text">Project entry - CPM - Resource defintion - Resource leveling - Cost - Project reports</p>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-file-powerpoint"></i> Slides
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Full Slides</a></li>
-                  <li><a class="dropdown-item" href="#">Handout Slides</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-book-open"></i> Extras
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  <li><a class="dropdown-item" href="#">Text 1</a></li>
-                  <li><a class="dropdown-item" href="#">Video 1</a></li>
-                </ul>
-              </div>
-
-              <div class="btn-group material-btn">
-                <button type="button" class="btn btn-outline-dark btn-lg">
-                  <i class="fa-solid fa-video"></i> Recorded Lecture
-                </button>
-              </div>
-
-            </div>
-
-            <div class="material-col col-lg-4 col-md-6">
-              <div class="card">
-                <div class="card-header">
-                  <h4>Exercise MSP</h4>
-                </div>
-                <div class="d-flex flex-column card-body">
-                  <p>Microsoft Project</p>
-                  <p>Graded (7.5%)</p>
-                  <div class="d-grid gap-2 mt-auto">
-                    <button class="btn btn-lg btn-block btn-outline-dark" type="button">Start</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="accordion-item">
-      <h3 class="accordion-header" id="flush-heading5">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse5" aria-expanded="false" aria-controls="flush-collapse5">
-          Project Risk Management
-        </button>
-      </h3>
-      <div id="flush-collapse5" class="accordion-collapse collapse" aria-labelledby="flush-heading5" data-bs-parent="#accordionFlushExample">
-        <div class="accordion-body ">
-
-          <div class="material-col-text-temporary">
-            <p class="normal-text">Risk identification - Risk Analysis - Risk Mitigation - Risk Control</p>
-
-            <div class="btn-group material-btn">
-              <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-file-powerpoint"></i> Slides
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" href="#">Full Slides</a></li>
-                <li><a class="dropdown-item" href="#">Handout Slides</a></li>
-              </ul>
-            </div>
-
-            <div class="btn-group material-btn">
-              <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-book-open"></i> Extras
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" href="#">Text 1</a></li>
-                <li><a class="dropdown-item" href="#">Video 1</a></li>
-              </ul>
-            </div>
-
-            <div class="btn-group material-btn">
-              <button type="button" class="btn btn-outline-dark btn-lg">
-                <i class="fa-solid fa-video"></i> Recorded Lecture
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <div class="accordion-item">
-      <h3 class="accordion-header" id="flush-heading6">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse6" aria-expanded="false" aria-controls="flush-collapse6">
-          Simulation
-        </button>
-      </h3>
-      <div id="flush-collapse6" class="accordion-collapse collapse" aria-labelledby="flush-heading6" data-bs-parent="#accordionFlushExample">
-        <div class="accordion-body">
-
-          <div class="material-col-text-temporary">
-            <p class="normal-text">Simulating a project using Microsoft Excel and Visual Basics for Applications (VBA)</p>
-
-            <div class="btn-group material-btn">
-              <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-file-powerpoint"></i> Slides
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" href="#">Full Slides</a></li>
-                <li><a class="dropdown-item" href="#">Handout Slides</a></li>
-              </ul>
-            </div>
-
-            <div class="btn-group material-btn">
-              <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-book-open"></i> Extras
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" href="#">Text 1</a></li>
-                <li><a class="dropdown-item" href="#">Video 1</a></li>
-              </ul>
-            </div>
-
-            <div class="btn-group material-btn">
-              <button type="button" class="btn btn-outline-dark btn-lg">
-                <i class="fa-solid fa-video"></i> Recorded Lecture
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="accordion-item">
-      <h3 class="accordion-header" id="flush-heading7">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse7" aria-expanded="false" aria-controls="flush-collapse7">
-          Agile Project Management
-        </button>
-      </h3>
-      <div id="flush-collapse7" class="accordion-collapse collapse" aria-labelledby="flush-heading7" data-bs-parent="#accordionFlushExample">
-        <div class="accordion-body">
-
-          <div class="material-col-text-temporary">
-            <p class="normal-text">Iterative project management - Agile methodology - Scrum - Sprints</p>
-
-            <div class="btn-group material-btn">
-              <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-file-powerpoint"></i> Slides
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" href="#">Full Slides</a></li>
-                <li><a class="dropdown-item" href="#">Handout Slides</a></li>
-              </ul>
-            </div>
-
-            <div class="btn-group material-btn">
-              <button class="btn btn-outline-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-book-open"></i> Extras
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" href="#">Text 1</a></li>
-                <li><a class="dropdown-item" href="#">Video 1</a></li>
-              </ul>
-            </div>
-
-            <div class="btn-group material-btn">
-              <button type="button" class="btn btn-outline-dark btn-lg">
-                <i class="fa-solid fa-video"></i> Recorded Lecture
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
+    <table class="table table-hover table-cpm">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Critical Path</th>
+          <th scope="col">Cumulative Duration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < proj.cpNr; i++) { %>
+          <tr>
+            <th scope="row"><%=i+1%></th>
+            <td><%=proj.cpNames[i]%></td>
+            <td><%=proj.makespan%></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
 
   </div>
-
 </section>
 
 <%- include('partials/footer') %>

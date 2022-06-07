@@ -59,12 +59,34 @@ h1, h2, h3, h4, h5, h6 {
   margin: auto;
 }
 
+/* CPM */
+.cpm-exe-sec{
+  padding: 7% 10% 3%;
+}
+.cpm-exe-sec .sec-head{
+  padding: 5% 0 0;
+}
+.cpm-sol-sec{
+  padding: 7% 10% 3%;
+}
+.table-cpm{
+  margin-top: 10%;
+}
+
+/*log header*/
+.log-head-sec .container-fluid{
+  padding: 0 15%;
+}
+.log-head-sec .navbar{
+  background-color: #F38181;
+}
+
 /* Section Title */
 .title-sec .container-fluid{
   padding: 2% 15% 7%;
   text-align: left;
 }
-.navbar {
+.title-sec .navbar {
   padding: 0 0 4.5rem 0;
 }
 /* .navbar-brand {
@@ -147,21 +169,19 @@ h1, h2, h3, h4, h5, h6 {
 
 
 /* Section material */
-.material-flush-div{
+.material-sec {
+  padding: 7% 10%;
+}
+.material-sec .sec-head{
   padding: 5% 0 0;
 }
-.material-sec {
-  /* display: none; */
-  padding: 7% 10%;
+.material-flush-div{
+  padding: 5% 0 0;
 }
 .material-col{
   padding: 3% 2%;
 }
 .material-col-text{
-  text-align: left;
-}
-.material-col-text-temporary{
-  padding: 3% 2%;
   text-align: left;
 }
 .material-btn{
@@ -182,11 +202,11 @@ h1, h2, h3, h4, h5, h6 {
   background-color: inherit;
 }
 .accordion-button:hover{
-  background-color: #FCE38A;
+  background-color: #EAFFD0;
 }
 .accordion-button:not(.collapsed){
   /* color: inherit; */
-  background-color: #FCE38A;
+  background-color: #EAFFD0;
   color: inherit;
 }
 .accordion-button:focus{

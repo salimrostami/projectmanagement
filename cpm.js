@@ -1,5 +1,35 @@
 module.exports = cpmGenerate;
 
+function criticalPathFinder(proj, job, currentPath){
+  const sucNr = proj.arcs[job].reduce((partialSum, a) => partialSum + a, 0); // sum of elements in P[job]
+
+  if (sucNr === 0) { //Job is ending node (currentPath is a new critical path)
+    var cumDur = 0;
+    for (var i = 0; i < currentPath.length; i++) { // cumulative duration of currentPath
+      cumDur = cumDur + proj.durations[currentPath[i]];
+    }
+    if (cumDur === proj.makespan) { // if currentPath is one of the longest paths of the network
+      proj.cpNr++;
+      let newPath = currentPath.slice();
+      proj.cps.push(newPath);
+    }
+    currentPath.pop();
+    return;
+  } else {
+    for (var i = job + 1; i < proj.size; i++) {
+      if (proj.arcs[job][i] === 1) { // is a successor of Job
+        if (proj.floats[i] === 0) { // i is a critical acctivity
+          let updatedPath = currentPath.slice();
+          currentPath.push(i);
+          criticalPathFinder(proj, i, currentPath);
+        }
+      }
+    }
+    currentPath.pop();
+    return;
+  }
+}
+
 function cpmGenerate(){
   // general variables & parameters
   const n = 10;
@@ -10,7 +40,7 @@ function cpmGenerate(){
   var pTransBool; // true if transitive predecessor
   var pCount; // counter of transitive arcs
   const pMax = n*(n-1)/2; // max theoretical number of transitive arcs
-  var os; // the order strength of a generated project
+  var pOs; // the order strength of a generated project
   const osMin = 0.45;
   const osMax = 0.65;
   var projValidBool; // true if a generated project is feasible & acceptable
@@ -31,19 +61,19 @@ function cpmGenerate(){
   }
   const alpha = Array.from(Array(n)).map((e, i) => i + 65);
   const N = alpha.map((x) => String.fromCharCode(x));
-  console.log(N);
+  var pNames = new Array(n); // string names of the immediate predecessors
   var est = new Array(n); // earliest start times
   var lst = new Array(n); // latest start times
   var eft = new Array(n); // earliest finish times
   var lft = new Array(n); // latest finish times
   var F = new Array(n); // float times
 
-
   // generate the project
   do {
     // initializations
     for (var i = 0; i < n; i++) {
       D[i] = 0;
+      pNames[i] = '';
       for (var j = 0; j < n; j++) {
         P[i][j] = 0;
         A[i][j] = 0;
@@ -58,7 +88,6 @@ function cpmGenerate(){
     for (var i = 0; i < n; i++) {
       D[i] = Math.floor((Math.random() * dMax) + dMin);
     }
-    console.log(D);
 
     // random transitive network
     for (var i = 0; i < n; i++) {
@@ -78,10 +107,6 @@ function cpmGenerate(){
         }
       }
     }
-    for (var i = 0; i < n; i++) {
-      console.log("P[", i, "]:");
-      console.log(P[i]);
-    }
 
     // immediate arcs
     for (var i = 0; i < n; i++) {
@@ -96,13 +121,14 @@ function cpmGenerate(){
           }
           if (!pTransBool) { // if not transitive, then immediate
             A[i][j] = 1; // immediate predecessor
+            if (pNames[j].length > 0) {
+              pNames[j] = pNames[j] + ", " + N[i];
+            } else {
+              pNames[j] = pNames[j] + N[i];
+            }
           }
         }
       }
-    }
-    for (var i = 0; i < n; i++) {
-      console.log("A[", i, "]:");
-      console.log(A[i]);
     }
 
     // network feasible?
@@ -128,11 +154,10 @@ function cpmGenerate(){
     }
 
     // OS in range?
-    os = pCount/pMax;
-    console.log("OS:", os);
-    if (os < osMin || os > osMax) {
+    pOs = pCount/pMax;
+    if (pOs < osMin || pOs > osMax) {
       projValidBool = false;
-      console.log("OS not acceptable");
+      // console.log("OS not acceptable");
     }
 
     // multiple ending nodes?
@@ -143,10 +168,9 @@ function cpmGenerate(){
           endCount++;
         }
       }
-      console.log("ending nodes = ", endCount);
       if (endCount < terminalMin || endCount > terminalMax) {
         projValidBool = false;
-        console.log("number of ending nodes not acceptable");
+        // console.log("number of ending nodes not acceptable");
       }
     }
 
@@ -160,20 +184,19 @@ function cpmGenerate(){
             break;
           }
         }
-        if (xCounter === 0) { // no successors
+        if (xCounter === 0) { // no predecessors
           startCount++;
         }
       }
-      console.log("starting nodes = ", startCount);
       if (startCount < terminalMin || startCount > terminalMax) {
         projValidBool = false;
-        console.log("number of starting nodes not acceptable");
+        // console.log("number of starting nodes not acceptable");
       }
     }
 
   } while (!projValidBool);
 
-  /////////////////// solve the instance
+  /////////////////// CPM calculations
   // forwarf pass
   projDuration = 0;
   for (var i = 0; i < n; i++) {
@@ -186,8 +209,6 @@ function cpmGenerate(){
     eft[i] = est[i] + D[i];
     projDuration = Math.max(projDuration, eft[i]);
   }
-  console.log("est: ", est)
-  console.log("eft: ", eft)
   //backward pass
   for (var i = n - 1; i >= 0; i--) {
     lft[i] = projDuration;
@@ -198,13 +219,52 @@ function cpmGenerate(){
     }
     lst[i] = lft[i] - D[i];
   }
-  console.log("lst: ", lst)
-  console.log("lft: ", lft)
   // Floats
   for (var i = 0; i < n; i++) {
     F[i] = lst[i] - est[i];
   }
-  console.log("floats: ", F)
-  console.log("total project duration: ", projDuration);
 
+  ///////////////////////// Create the project objective to export
+  const cpmProj = {
+    size: n,
+    activities: N,
+    durations: D,
+    arcs: A,
+    precedences: P,
+    predNames:pNames,
+    makespan: projDuration,
+    es: est,
+    ef: eft,
+    ls: lst,
+    lf: lft,
+    floats: F,
+    cpNr: 0,
+    cps:[],
+    cpNames:[],
+    os: pOs
+  }
+
+  //////////////////////// find critical paths
+  for (var i = 0; i < n; i++) {
+    xCounter = 0;
+    for (var j = 0; j < i; j++) {
+      if (P[j][i] === 1) {
+        xCounter++;
+        break;
+      }
+    }
+    if (xCounter === 0 && F[i] === 0) { // no predecessors & critical
+      criticalPathFinder(cpmProj, i, [i]);
+    }
+  }
+  for (var i = 0; i < cpmProj.cpNr; i++) { // creating cp names
+    let cpName = '';
+    cpName = cpName + cpmProj.activities[cpmProj.cps[i][0]];
+    for (var j = 1; j < cpmProj.cps[i].length; j++) {
+      cpName = cpName + '-' + cpmProj.activities[cpmProj.cps[i][j]];
+    }
+    cpmProj.cpNames.push(cpName);
+  }
+
+  return cpmProj;
 }

@@ -108,14 +108,12 @@ app.get("/logout", function(req, res){
 });
 
 app.get("/cpm-exercise", function(req, res){
-  cpm();
-  res.render("cpm");
-
-  // if (req.isAuthenticated()) {
-  //
-  // } else {
-  //   res.redirect("/login");
-  // }
+  if (req.isAuthenticated()) {
+    const cpmProj = cpm();
+    res.render("cpm", {proj: cpmProj});
+  } else {
+    res.redirect("/login");
+  }
 });
 
 //Set up POST routes
