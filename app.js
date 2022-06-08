@@ -93,7 +93,7 @@ app.get("/register", function(req, res){
 
 app.get("/content", nocache, function(req, res){
   if (req.isAuthenticated()) {
-    res.render("content");
+    res.render("content", {user: req.user});
   } else {
     res.redirect("/login");
   }
@@ -107,10 +107,18 @@ app.get("/logout", function(req, res){
   });
 });
 
-app.get("/cpm-exercise", function(req, res){
+app.get("/cpm", function(req, res){
   if (req.isAuthenticated()) {
     const cpmProj = cpm();
-    res.render("cpm", {proj: cpmProj});
+    res.render("cpm", {proj: cpmProj, user: req.user});
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.get("/user", function(req, res){
+  if (req.isAuthenticated()) {
+    res.render("user", {user: req.user});
   } else {
     res.redirect("/login");
   }
@@ -130,10 +138,10 @@ app.post("/register", function(req, res){
   })
 });
 
-app.post('/login',
-  passport.authenticate('local', { failureRedirect: '/login' }),
+app.post("/login",
+  passport.authenticate("local", { failureRedirect: "/login" }),
   function(req, res) {
-    res.redirect('/content');
+    res.redirect("/content");
 });
 
 // Set up the app port
