@@ -1,3 +1,4 @@
+//jshint esversion:6
 module.exports = cpmGenerate;
 
 function criticalPathFinder(proj, job, currentPath){
@@ -67,6 +68,7 @@ function cpmGenerate(){
   var eft = new Array(n); // earliest finish times
   var lft = new Array(n); // latest finish times
   var F = new Array(n); // float times
+  var crit = new Array(n); // true if critical activity
 
   // generate the project
   do {
@@ -222,6 +224,11 @@ function cpmGenerate(){
   // Floats
   for (var i = 0; i < n; i++) {
     F[i] = lst[i] - est[i];
+    if (F[i] === 0) {
+      crit[i] = true;
+    } else {
+      crit[i] = false;
+    }
   }
 
   ///////////////////////// Create the project objective to export
@@ -238,10 +245,13 @@ function cpmGenerate(){
     ls: lst,
     lf: lft,
     floats: F,
+    critical: crit,
     cpNr: 0,
     cps:[],
     cpNames:[],
-    os: pOs
+    os: pOs,
+    goNodes:[],
+    goLinks: []
   }
 
   //////////////////////// find critical paths
@@ -264,6 +274,22 @@ function cpmGenerate(){
       cpName = cpName + '-' + cpmProj.activities[cpmProj.cps[i][j]];
     }
     cpmProj.cpNames.push(cpName);
+
+  }
+
+
+  ///// gojs nodes and links arrays
+  for (var i = 0; i < cpmProj.size; i++) {
+    const newNode = { key: i, text: cpmProj.activities[i], length: cpmProj.durations[i], earlyStart: cpmProj.es[i], lateFinish: cpmProj.lf[i], critical: cpmProj.critical[i] };
+    cpmProj.goNodes.push(newNode);
+  }
+  for (var i = 0; i < cpmProj.size; i++) {
+    for (var j = i+1; j < cpmProj.size; j++) {
+      if (cpmProj.arcs[i][j] === 1) {
+        const newLink = { from: i, to: j };
+        cpmProj.goLinks.push(newLink);
+      }
+    }
   }
 
   return cpmProj;
