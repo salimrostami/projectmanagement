@@ -68,7 +68,9 @@ function cpmGenerate(){
   var eft = new Array(n); // earliest finish times
   var lft = new Array(n); // latest finish times
   var F = new Array(n); // float times
-  var crit = new Array(n); // true if critical activity
+  var critBool = new Array(n); // true if critical activity
+  var startBool = new Array(n); // true if starting node
+  var endBool = new Array(n); // true if ending node
 
   // generate the project
   do {
@@ -76,6 +78,8 @@ function cpmGenerate(){
     for (var i = 0; i < n; i++) {
       D[i] = 0;
       pNames[i] = '';
+      startBool[i] = false;
+      endBool[i] = false;
       for (var j = 0; j < n; j++) {
         P[i][j] = 0;
         A[i][j] = 0;
@@ -168,6 +172,7 @@ function cpmGenerate(){
         xCounter = P[i].reduce((partialSum, a) => partialSum + a, 0); // sum of elements in P[i]
         if (xCounter === 0) { // no successors
           endCount++;
+          endBool[i] = true;
         }
       }
       if (endCount < terminalMin || endCount > terminalMax) {
@@ -188,6 +193,7 @@ function cpmGenerate(){
         }
         if (xCounter === 0) { // no predecessors
           startCount++;
+          startBool[i] = true;
         }
       }
       if (startCount < terminalMin || startCount > terminalMax) {
@@ -225,9 +231,9 @@ function cpmGenerate(){
   for (var i = 0; i < n; i++) {
     F[i] = lst[i] - est[i];
     if (F[i] === 0) {
-      crit[i] = true;
+      critBool[i] = true;
     } else {
-      crit[i] = false;
+      critBool[i] = false;
     }
   }
 
@@ -245,25 +251,18 @@ function cpmGenerate(){
     ls: lst,
     lf: lft,
     floats: F,
-    critical: crit,
+    critical: critBool,
     cpNr: 0,
     cps:[],
     cpNames:[],
     os: pOs,
     goNodes:[],
     goLinks: []
-  }
+  };
 
   //////////////////////// find critical paths
   for (var i = 0; i < n; i++) {
-    xCounter = 0;
-    for (var j = 0; j < i; j++) {
-      if (P[j][i] === 1) {
-        xCounter++;
-        break;
-      }
-    }
-    if (xCounter === 0 && F[i] === 0) { // no predecessors & critical
+    if (startBool[i] && critBool[i]) { // starting node & critical
       criticalPathFinder(cpmProj, i, [i]);
     }
   }
@@ -274,21 +273,31 @@ function cpmGenerate(){
       cpName = cpName + '-' + cpmProj.activities[cpmProj.cps[i][j]];
     }
     cpmProj.cpNames.push(cpName);
-
   }
 
-
   ///// gojs nodes and links arrays
-  for (var i = 0; i < cpmProj.size; i++) {
-    const newNode = { key: i, text: cpmProj.activities[i], length: cpmProj.durations[i], earlyStart: cpmProj.es[i], lateFinish: cpmProj.lf[i], critical: cpmProj.critical[i] };
+  const startNode = { key: 0, text: "Dummy Start", length: 0, earlyStart: 0, lateFinish: 0, critical: true };
+  cpmProj.goNodes.push(startNode); // dummy start node
+  const endNode = { key: cpmProj.size+1, text: "Dummy End", length: 0, earlyStart: cpmProj.makespan, lateFinish: cpmProj.makespan, critical: true };
+  cpmProj.goNodes.push(endNode); // dummy end node
+  for (var i = 0; i < cpmProj.size; i++) { // real nodes
+    const newNode = { key: i+1, text: cpmProj.activities[i], length: cpmProj.durations[i], earlyStart: cpmProj.es[i], lateFinish: cpmProj.lf[i], critical: cpmProj.critical[i] };
     cpmProj.goNodes.push(newNode);
   }
   for (var i = 0; i < cpmProj.size; i++) {
+    if (startBool[i]) {
+      const startLink = { from: 0, to: i+1 };
+      cpmProj.goLinks.push(startLink);
+    }
     for (var j = i+1; j < cpmProj.size; j++) {
       if (cpmProj.arcs[i][j] === 1) {
-        const newLink = { from: i, to: j };
+        const newLink = { from: i+1, to: j+1 };
         cpmProj.goLinks.push(newLink);
       }
+    }
+    if (endBool[i]) {
+      const endLink = { from: i+1, to: cpmProj.size+1 };
+      cpmProj.goLinks.push(endLink);
     }
   }
 
