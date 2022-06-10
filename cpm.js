@@ -17,10 +17,9 @@ function criticalPathFinder(proj, job, currentPath){
     currentPath.pop();
     return;
   } else {
-    for (var i = job + 1; i < proj.size; i++) {
+    for (var i = job + 1; i < proj.n; i++) {
       if (proj.arcs[job][i] === 1) { // is a successor of Job
         if (proj.floats[i] === 0) { // i is a critical acctivity
-          let updatedPath = currentPath.slice();
           currentPath.push(i);
           criticalPathFinder(proj, i, currentPath);
         }
@@ -36,6 +35,8 @@ function cpmGenerate(){
   const n = 10;
   const dMin = 1;
   const dMax = 10;
+  const timeHorizon = n * dMax;
+  const maxR = 3;
   const pProb = 0.30;
   var pRand;
   var pTransBool; // true if transitive predecessor
@@ -51,6 +52,7 @@ function cpmGenerate(){
   var projDuration; // total duration of the project
   const terminalMin = 2; // minimum number of terminal (start/end) nodes
   const terminalMax = 3; // maximum number of terminal (start/end) nodes
+  const rProb = 0.85; // probability threshold for resource assignment
 
   // Array creations
   var D = new Array(n); // D[i]: duration of i
@@ -71,6 +73,13 @@ function cpmGenerate(){
   var critBool = new Array(n); // true if critical activity
   var startBool = new Array(n); // true if starting node
   var endBool = new Array(n); // true if ending node
+  var R = new Array(n); // resource requirement of the activities
+  var eligBool = new Array(n); // true if eligible activity
+  var addedBool = new Array(n); // true is activity added to the list
+  var rFree = new Array(maxR);
+  for (var i = 0; i < maxR; i++) {
+    rFree[i] = new Array(timeHorizon);
+  }
 
   // generate the project
   do {
@@ -237,25 +246,48 @@ function cpmGenerate(){
     }
   }
 
+  // assign resources
+  for (var i = 0; i < n; i++) {
+    R[i] = maxR;
+    if(startBool[i]){
+      R[i] = 0;
+    } else if (endBool[i]) {
+      R[i] = 2;
+    } else {
+      const rand = Math.random();
+      if (rand < rProb) {
+        R[i] = 1;
+      } else {
+        R[i] = 2;
+      }
+    }
+    if (R[i] === maxR) {
+      console.log("Resource allocation error!");
+    }
+  }
+
   ///////////////////////// Create the project objective to export
-  const cpmProj = {
-    size: n,
-    activities: N,
+  const proj = {
+    n: n,
+    names: N,
     durations: D,
     arcs: A,
     precedences: P,
-    predNames:pNames,
+    predStrings:pNames,
+    resources: R,
     makespan: projDuration,
     es: est,
     ef: eft,
     ls: lst,
     lf: lft,
     floats: F,
-    critical: critBool,
+    caBools: critBool,
     cpNr: 0,
     cps:[],
-    cpNames:[],
-    os: pOs,
+    cpStrings:[],
+    priorities:[],
+    serialSt: [],
+    parallelSt: [],
     goNodes:[],
     goLinks: []
   };
@@ -263,43 +295,118 @@ function cpmGenerate(){
   //////////////////////// find critical paths
   for (var i = 0; i < n; i++) {
     if (startBool[i] && critBool[i]) { // starting node & critical
-      criticalPathFinder(cpmProj, i, [i]);
+      criticalPathFinder(proj, i, [i]);
     }
   }
-  for (var i = 0; i < cpmProj.cpNr; i++) { // creating cp names
+  for (var i = 0; i < proj.cpNr; i++) { // creating cp names
     let cpName = '';
-    cpName = cpName + cpmProj.activities[cpmProj.cps[i][0]];
-    for (var j = 1; j < cpmProj.cps[i].length; j++) {
-      cpName = cpName + '-' + cpmProj.activities[cpmProj.cps[i][j]];
+    cpName = cpName + proj.names[proj.cps[i][0]];
+    for (var j = 1; j < proj.cps[i].length; j++) {
+      cpName = cpName + '-' + proj.names[proj.cps[i][j]];
     }
-    cpmProj.cpNames.push(cpName);
+    proj.cpStrings.push(cpName);
   }
 
-  ///// gojs nodes and links arrays
-  const startNode = { key: 0, text: "Dummy Start", length: 0, earlyStart: 0, lateFinish: 0, critical: true };
-  cpmProj.goNodes.push(startNode); // dummy start node
-  const endNode = { key: cpmProj.size+1, text: "Dummy End", length: 0, earlyStart: cpmProj.makespan, lateFinish: cpmProj.makespan, critical: true };
-  cpmProj.goNodes.push(endNode); // dummy end node
-  for (var i = 0; i < cpmProj.size; i++) { // real nodes
-    const newNode = { key: i+1, text: cpmProj.activities[i], length: cpmProj.durations[i], earlyStart: cpmProj.es[i], lateFinish: cpmProj.lf[i], critical: cpmProj.critical[i] };
-    cpmProj.goNodes.push(newNode);
+  //////////////////////// Prioritize activities
+  var addedCounter = 0;
+  for (var i = 0; i < proj.n; i++) {
+    addedBool[i] = false;
+    if (startBool[i]) {
+      eligBool[i] = true;
+    } else {
+      eligBool[i] = false;
+    }
   }
-  for (var i = 0; i < cpmProj.size; i++) {
+  var minDur = dMax;
+  var selectedJob = 0;
+  while (addedCounter < proj.n) {
+    minDur = dMax + 1;
+    selectedJob = proj.n;
+    for (var i = 0; i < proj.n; i++) {
+      if (eligBool[i] && proj.durations[i] < minDur) {
+        selectedJob = i;
+        minDur = proj.durations[i];
+      }
+    }
+    proj.priorities[addedCounter] = selectedJob;
+    addedCounter++;
+    addedBool[selectedJob] = true;
+    eligBool[selectedJob] = false;
+    for (var i = selectedJob + 1; i < proj.n; i++) {
+      if ((proj.arcs[selectedJob][i] === 1)) {
+        eligBool[i] = true;
+        for (var j = 0; j < i; j++) {
+          if ((proj.arcs[j][i] === 1) && !addedBool[j]) {
+            eligBool[i] = false;
+          }
+        }
+      }
+    }
+  }
+
+  // Serial Schedule
+  var currentJob;
+  var maxPredFt;
+  var rFeasible;
+  for (var r = 0; r < maxR; r++) {
+    for (var t = 0; t < timeHorizon; t++) {
+      rFree[r][t] = true;
+    }
+  }
+  for (var i = 0; i < proj.n; i++) {
+    currentJob = proj.priorities[i];
+    maxPredFt = 0;
+    for (var j = 0; j < currentJob; j++) {
+      if ((proj.arcs[j][currentJob] === 1) && (maxPredFt < proj.serialSt[j] + proj.durations[j])) {
+        maxPredFt = proj.serialSt[j] + proj.durations[j];
+      }
+    }
+    for (var t = maxPredFt; t < timeHorizon; t++) {
+      if (rFree[proj.resources[currentJob]][t]) {
+        rFeasible = true;
+        for (var u = t + 1; u < t + proj.durations[currentJob] ; u++) {
+          if (!rFree[proj.resources[currentJob]][u]) {
+            rFeasible = false;
+            break;
+          }
+        }
+        if (rFeasible) {
+          proj.serialSt[currentJob] = t;
+          for (var u = t; u < t + proj.durations[currentJob] ; u++) {
+            rFree[proj.resources[currentJob]][u] = false;
+          }
+          break;
+        }
+      }
+    }
+  }
+
+
+  ///// gojs nodes and links arrays
+  const startNode = { key: 0, text: "Start", length: 0, earlyStart: 0, lateFinish: 0, critical: true };
+  proj.goNodes.push(startNode); // dummy start node
+  const endNode = { key: proj.n+1, text: "End", length: 0, earlyStart: proj.makespan, lateFinish: proj.makespan, critical: true };
+  proj.goNodes.push(endNode); // dummy end node
+  for (var i = 0; i < proj.n; i++) { // real nodes
+    const newNode = { key: i+1, text: proj.names[i], length: proj.durations[i], earlyStart: proj.es[i], lateFinish: proj.lf[i], critical: proj.caBools[i] };
+    proj.goNodes.push(newNode);
+  }
+  for (var i = 0; i < proj.n; i++) {
     if (startBool[i]) {
       const startLink = { from: 0, to: i+1 };
-      cpmProj.goLinks.push(startLink);
+      proj.goLinks.push(startLink);
     }
-    for (var j = i+1; j < cpmProj.size; j++) {
-      if (cpmProj.arcs[i][j] === 1) {
+    for (var j = i+1; j < proj.n; j++) {
+      if (proj.arcs[i][j] === 1) {
         const newLink = { from: i+1, to: j+1 };
-        cpmProj.goLinks.push(newLink);
+        proj.goLinks.push(newLink);
       }
     }
     if (endBool[i]) {
-      const endLink = { from: i+1, to: cpmProj.size+1 };
-      cpmProj.goLinks.push(endLink);
+      const endLink = { from: i+1, to: proj.n+1 };
+      proj.goLinks.push(endLink);
     }
   }
 
-  return cpmProj;
+  return proj;
 }

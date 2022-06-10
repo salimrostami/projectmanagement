@@ -1,6 +1,6 @@
 <%- include('partials/logHeader', {user: user}) %>
 <section class="cpm-exe-sec color2-sec">
-  <h2 class="sec-head">Critical Path Method Exercise</h2>
+  <h2 class="sec-head">Resource Leveling Exercise</h2>
   <div class="container-fluid">
     <table class="table table-hover">
       <thead>
@@ -9,6 +9,7 @@
           <th scope="col">Activity</th>
           <th scope="col">Duration</th>
           <th scope="col">Predecessors</th>
+          <th scope="col">Resources</th>
         </tr>
       </thead>
       <tbody>
@@ -18,6 +19,7 @@
             <td><%=proj.names[i]%></td>
             <td><%=proj.durations[i]%></td>
             <td><%=proj.predStrings[i]%></td>
+            <td><%=proj.resources[i]+1%></td>
           </tr>
         <% } %>
       </tbody>
@@ -26,63 +28,27 @@
 </section>
 
 <section class="cpm-sol-sec color3-sec">
-  <h2 class="sec-head">CPM Solution</h2>
+  <h2 class="sec-head">RL Solution</h2>
   <div class="container-fluid">
 
     <table class="table table-hover">
       <thead>
         <tr>
-          <th scope="col">#</th>
+          <th scope="col">Priority Level</th>
           <th scope="col">Activity</th>
-          <th scope="col">EST</th>
-          <th scope="col">EFT</th>
-          <th scope="col">LST</th>
-          <th scope="col">LFT</th>
-          <th scope="col">Floats</th>
+          <th scope="col">Serial Start Time</th>
+          <th scope="col">Resource</th>
+          <th scope="col">Duration</th>
         </tr>
       </thead>
       <tbody>
         <% for (var i = 0; i < proj.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.names[i]%></td>
-            <td><%=proj.es[i]%></td>
-            <td><%=proj.ef[i]%></td>
-            <td><%=proj.ls[i]%></td>
-            <td><%=proj.lf[i]%></td>
-            <td><%=proj.floats[i]%></td>
-          </tr>
-        <% } %>
-      </tbody>
-    </table>
-
-    <table class="table table-hover table-results">
-      <thead>
-        <tr>
-          <th scope="col">Project Duration (=max(EFT) or max(LFT))</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><%=proj.makespan%></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <table class="table table-hover table-results">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Critical Path</th>
-          <th scope="col">Cumulative Duration</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for (var i = 0; i < proj.cpNr; i++) { %>
-          <tr>
-            <th scope="row"><%=i+1%></th>
-            <td><%=proj.cpStrings[i]%></td>
-            <td><%=proj.makespan%></td>
+            <td><%=proj.names[proj.priorities[i]]%></td>
+            <td><%=proj.serialSt[proj.priorities[i]]%></td>
+            <td><%=proj.resources[proj.priorities[i]]%></td>
+            <td><%=proj.durations[proj.priorities[i]]%></td>
           </tr>
         <% } %>
       </tbody>

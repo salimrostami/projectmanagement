@@ -109,8 +109,17 @@ app.get("/logout", function(req, res){
 
 app.get("/cpm", function(req, res){
   if (req.isAuthenticated()) {
-    const cpmProj = cpm();
-    res.render("cpm", {proj: cpmProj, user: req.user});
+    const proj = cpm();
+    res.render("cpm", {proj: proj, user: req.user});
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.get("/rl", function(req, res){
+  if (req.isAuthenticated()) {
+    const proj = cpm();
+    res.render("rl", {proj: proj, user: req.user});
   } else {
     res.redirect("/login");
   }
