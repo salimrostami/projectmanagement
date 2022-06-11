@@ -60,17 +60,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* CPM */
-.cpm-exe-sec{
+.exe-sec{
   padding: 7% 10% 3%;
 }
-.cpm-exe-sec .sec-head{
+.exe-sec .sec-head{
   padding: 5% 0 0;
 }
-.cpm-sol-sec{
+.sol-sec{
   padding: 7% 10% 3%;
 }
-.table-results{
+.sol-table{
   margin-top: 10%;
+}
+.timetable{
+  table-layout: fixed;
+  width: 95%;
+  margin: 5% auto 0;
 }
 
 /*log header*/

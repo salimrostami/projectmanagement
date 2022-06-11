@@ -19,7 +19,7 @@ function criticalPathFinder(proj, job, currentPath){
   } else {
     for (var i = job + 1; i < proj.n; i++) {
       if (proj.arcs[job][i] === 1) { // is a successor of Job
-        if (proj.floats[i] === 0) { // i is a critical acctivity
+        if (proj.caBools[i]) { // i is a critical acctivity
           currentPath.push(i);
           criticalPathFinder(proj, i, currentPath);
         }
@@ -254,12 +254,13 @@ function cpmGenerate(){
     } else if (endBool[i]) {
       R[i] = 2;
     } else {
-      const rand = Math.random();
-      if (rand < rProb) {
-        R[i] = 1;
-      } else {
-        R[i] = 2;
-      }
+      R[i] = 1;
+      // const rand = Math.random();
+      // if (rand < rProb) {
+      //   R[i] = 1;
+      // } else {
+      //   R[i] = 2;
+      // }
     }
     if (R[i] === maxR) {
       console.log("Resource allocation error!");
@@ -272,22 +273,25 @@ function cpmGenerate(){
     names: N,
     durations: D,
     arcs: A,
-    precedences: P,
+    // precedences: P,
     predStrings:pNames,
     resources: R,
+    rNr: maxR,
     makespan: projDuration,
     es: est,
-    ef: eft,
-    ls: lst,
+    // ef: eft,
+    // ls: lst,
     lf: lft,
-    floats: F,
+    // floats: F,
     caBools: critBool,
     cpNr: 0,
     cps:[],
     cpStrings:[],
     priorities:[],
     serialSt: [],
+    serialMakespan: 0,
     parallelSt: [],
+    parallelMakespan: 0,
     goNodes:[],
     goLinks: []
   };
@@ -348,7 +352,8 @@ function cpmGenerate(){
   var currentJob;
   var maxPredFt;
   var rFeasible;
-  for (var r = 0; r < maxR; r++) {
+  var totalDur = 0;
+  for (var r = 0; r < proj.rNr; r++) {
     for (var t = 0; t < timeHorizon; t++) {
       rFree[r][t] = true;
     }
@@ -357,8 +362,8 @@ function cpmGenerate(){
     currentJob = proj.priorities[i];
     maxPredFt = 0;
     for (var j = 0; j < currentJob; j++) {
-      if ((proj.arcs[j][currentJob] === 1) && (maxPredFt < proj.serialSt[j] + proj.durations[j])) {
-        maxPredFt = proj.serialSt[j] + proj.durations[j];
+      if (proj.arcs[j][currentJob] === 1) {
+        maxPredFt = Math.max(maxPredFt, proj.serialSt[j] + proj.durations[j]);
       }
     }
     for (var t = maxPredFt; t < timeHorizon; t++) {
@@ -372,6 +377,7 @@ function cpmGenerate(){
         }
         if (rFeasible) {
           proj.serialSt[currentJob] = t;
+          totalDur = Math.max(totalDur, t + proj.durations[currentJob]);
           for (var u = t; u < t + proj.durations[currentJob] ; u++) {
             rFree[proj.resources[currentJob]][u] = false;
           }
@@ -380,7 +386,61 @@ function cpmGenerate(){
       }
     }
   }
+  proj.serialMakespan = totalDur;
 
+  // Parallel Schedule
+  totalDur = 0;
+  addedCounter = 0;
+  var predFeasible;
+  for (var i = 0; i < proj.n; i++) {
+    addedBool[i] = false;
+  }
+  for (var r = 0; r < proj.rNr; r++) {
+    for (var t = 0; t < timeHorizon; t++) {
+      rFree[r][t] = true;
+    }
+  }
+  for (var t = 0; t < timeHorizon; t++) {
+    for (var i = 0; i < proj.n; i++) {
+      currentJob = proj.priorities[i];
+      if (!addedBool[currentJob]) {
+        predFeasible = true;
+        for (var j = 0; j < currentJob; j++) {
+          if (proj.arcs[j][currentJob] === 1){
+            if (!addedBool[j] || (proj.parallelSt[j] + proj.durations[j] > t)) {
+              predFeasible = false;
+              break;
+            }
+          }
+        }
+        if (predFeasible) {
+          rFeasible = true;
+          for (var u = t; u < t + proj.durations[currentJob]; u++) {
+            if (!rFree[proj.resources[currentJob]][u]) {
+              rFeasible = false;
+              break;
+            }
+          }
+          if (rFeasible) {
+            proj.parallelSt[currentJob] = t;
+            addedBool[currentJob] = true;
+            addedCounter++;
+            for (var u = t; u < t + proj.durations[currentJob]; u++) {
+              rFree[proj.resources[currentJob]][u] = false;
+            }
+            totalDur = Math.max(totalDur, t + proj.durations[currentJob]);
+          }
+        }
+      }
+      if (addedCounter === proj.n) {
+        break;
+      }
+    }
+    if (addedCounter === proj.n) {
+      break;
+    }
+  }
+  proj.parallelMakespan = totalDur;
 
   ///// gojs nodes and links arrays
   const startNode = { key: 0, text: "Start", length: 0, earlyStart: 0, lateFinish: 0, critical: true };

@@ -1,5 +1,5 @@
 <%- include('partials/logHeader', {user: user}) %>
-<section class="cpm-exe-sec color2-sec">
+<section class="exe-sec color2-sec">
   <h2 class="sec-head">Critical Path Method Exercise</h2>
   <div class="container-fluid">
     <table class="table table-hover">
@@ -25,7 +25,7 @@
   </div>
 </section>
 
-<section class="cpm-sol-sec color3-sec">
+<section class="sol-sec color3-sec">
   <h2 class="sec-head">CPM Solution</h2>
   <div class="container-fluid">
 
@@ -47,16 +47,16 @@
             <th scope="row"><%=i+1%></th>
             <td><%=proj.names[i]%></td>
             <td><%=proj.es[i]%></td>
-            <td><%=proj.ef[i]%></td>
-            <td><%=proj.ls[i]%></td>
+            <td><%=proj.es[i] + proj.durations[i]%></td>
+            <td><%=proj.lf[i] - proj.durations[i]%></td>
             <td><%=proj.lf[i]%></td>
-            <td><%=proj.floats[i]%></td>
+            <td><%=proj.lf[i] - proj.durations[i] - proj.es[i]%></td>
           </tr>
         <% } %>
       </tbody>
     </table>
 
-    <table class="table table-hover table-results">
+    <table class="table table-hover sol-table">
       <thead>
         <tr>
           <th scope="col">Project Duration (=max(EFT) or max(LFT))</th>
@@ -69,7 +69,7 @@
       </tbody>
     </table>
 
-    <table class="table table-hover table-results">
+    <table class="table table-hover sol-table">
       <thead>
         <tr>
           <th scope="col">#</th>
