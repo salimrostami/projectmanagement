@@ -15,9 +15,9 @@
         <% for (var i = 0; i < proj.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.names[i]%></td>
-            <td><%=proj.durations[i]%></td>
-            <td><%=proj.predStrings[i]%></td>
+            <td><%=proj.N[i]%></td>
+            <td><%=proj.D[i]%></td>
+            <td><%=proj.pStr[i]%></td>
           </tr>
         <% } %>
       </tbody>
@@ -45,12 +45,12 @@
         <% for (var i = 0; i < proj.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.names[i]%></td>
+            <td><%=proj.N[i]%></td>
             <td><%=proj.es[i]%></td>
-            <td><%=proj.es[i] + proj.durations[i]%></td>
-            <td><%=proj.lf[i] - proj.durations[i]%></td>
+            <td><%=proj.es[i] + proj.D[i]%></td>
+            <td><%=proj.lf[i] - proj.D[i]%></td>
             <td><%=proj.lf[i]%></td>
-            <td><%=proj.lf[i] - proj.durations[i] - proj.es[i]%></td>
+            <td><%=proj.lf[i] - proj.D[i] - proj.es[i]%></td>
           </tr>
         <% } %>
       </tbody>
@@ -81,7 +81,7 @@
         <% for (var i = 0; i < proj.cpNr; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.cpStrings[i]%></td>
+            <td><%=proj.cpStr[i]%></td>
             <td><%=proj.makespan%></td>
           </tr>
         <% } %>
@@ -203,7 +203,7 @@
         // const jsonProj = <%- JSON.stringify(proj) %>;
         // var nodeDataArray = [];
         // for (var i = 0; i < jsonProj.n; i++) {
-        //   const newNode = { key: i, text: jsonProj.names[i], length: jsonProj.durations[i], earlyStart: jsonProj.es[i], lateFinish: jsonProj.lf[i], critical: jsonProj.caBools[i] };
+        //   const newNode = { key: i, text: jsonProj.N[i], length: jsonProj.D[i], earlyStart: jsonProj.es[i], lateFinish: jsonProj.lf[i], critical: jsonProj.caBool[i] };
         //   nodeDataArray.push(newNode);
         // }
         // var linkDataArray = [];

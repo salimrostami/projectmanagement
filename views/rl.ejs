@@ -16,10 +16,10 @@
         <% for (var i = 0; i < proj.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.names[i]%></td>
-            <td><%=proj.durations[i]%></td>
-            <td><%=proj.predStrings[i]%></td>
-            <td><%=proj.resources[i]+1%></td>
+            <td><%=proj.N[i]%></td>
+            <td><%=proj.D[i]%></td>
+            <td><%=proj.pStr[i]%></td>
+            <td><%=proj.R[i]+1%></td>
           </tr>
         <% } %>
       </tbody>
@@ -44,9 +44,9 @@
         <% for (var i = 0; i < proj.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.names[proj.priorities[i]]%></td>
-            <td><%=proj.serialSt[proj.priorities[i]]%></td>
-            <td><%=proj.parallelSt[proj.priorities[i]]%></td>
+            <td><%=proj.N[proj.priority[i]]%></td>
+            <td><%=proj.sgsSt[proj.priority[i]]%></td>
+            <td><%=proj.pgsSt[proj.priority[i]]%></td>
           </tr>
         <% } %>
       </tbody>
@@ -62,11 +62,11 @@
       <tbody>
           <tr>
             <th scope="row">Serial</th>
-            <td><%=proj.serialMakespan%></td>
+            <td><%=proj.sgsMakespan%></td>
           </tr>
           <tr>
             <th scope="row">Parallel</th>
-            <td><%= proj.parallelMakespan %></td>
+            <td><%= proj.pgsMakespan %></td>
           </tr>
       </tbody>
     </table>
@@ -78,20 +78,20 @@
   <thead>
     <tr>
       <th scope="col" style="width: 100px; border-right: 1px solid;">Resource</th>
-      <th scope="col" colspan="<%=proj.serialMakespan+1%>">Serial Schedule Generation</th>
+      <th scope="col" colspan="<%=proj.sgsMakespan+1%>">Serial Schedule Generation</th>
     </tr>
   </thead>
   <tbody>
     <% for (var r = 0; r < proj.rNr; r++) { %>
       <tr>
         <th scope="row" style="border-top: 1px solid; border-bottom: 1px solid; border-top: 1px solid;"><%=r+1%></th>
-        <% for (var t = 0; t < proj.serialMakespan+1; t++) { %>
+        <% for (var t = 0; t < proj.sgsMakespan+1; t++) { %>
           <% var schBool = false; %>
           <% for (var i = 0; i < proj.n; i++) { %>
-            <%if ((proj.resources[i] === r) && (proj.serialSt[i] === t)) {%>
-              <td colspan="<%=proj.durations[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=proj.names[i]%></td>
+            <%if ((proj.R[i] === r) && (proj.sgsSt[i] === t)) {%>
+              <td colspan="<%=proj.D[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=proj.N[i]%></td>
               <% schBool = true; %>
-              <% t = t + proj.durations[i] - 1;%>
+              <% t = t + proj.D[i] - 1;%>
               <% break; %>
             <%}%>
           <%}%>
@@ -103,7 +103,7 @@
     <% } %>
     <tr>
       <th></th>
-      <% for (var t = 0; t < proj.serialMakespan+1; t++) { %>
+      <% for (var t = 0; t < proj.sgsMakespan+1; t++) { %>
         <td><%=t%></td>
       <%}%>
     </tr>
@@ -114,20 +114,20 @@
   <thead>
     <tr>
       <th scope="col" style="width: 100px; border-right: 1px solid;">Resource</th>
-      <th scope="col" colspan="<%=proj.parallelMakespan+1%>">Parallel Schedule Generation</th>
+      <th scope="col" colspan="<%=proj.pgsMakespan+1%>">Parallel Schedule Generation</th>
     </tr>
   </thead>
   <tbody>
     <% for (var r = 0; r < proj.rNr; r++) { %>
       <tr>
         <th scope="row" style="border-top: 1px solid; border-bottom: 1px solid; border-top: 1px solid;"><%=r+1%></th>
-        <% for (var t = 0; t < proj.parallelMakespan+1; t++) { %>
+        <% for (var t = 0; t < proj.pgsMakespan+1; t++) { %>
           <% var schBool = false; %>
           <% for (var i = 0; i < proj.n; i++) { %>
-            <%if ((proj.resources[i] === r) && (proj.parallelSt[i] === t)) {%>
-              <td colspan="<%=proj.durations[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=proj.names[i]%></td>
+            <%if ((proj.R[i] === r) && (proj.pgsSt[i] === t)) {%>
+              <td colspan="<%=proj.D[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=proj.N[i]%></td>
               <% schBool = true; %>
-              <% t = t + proj.durations[i] - 1;%>
+              <% t = t + proj.D[i] - 1;%>
               <% break; %>
             <%}%>
           <%}%>
@@ -139,7 +139,7 @@
     <% } %>
     <tr>
       <th></th>
-      <% for (var t = 0; t < proj.parallelMakespan+1; t++) { %>
+      <% for (var t = 0; t < proj.pgsMakespan+1; t++) { %>
         <td><%=t%></td>
       <%}%>
     </tr>
