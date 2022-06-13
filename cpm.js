@@ -1,105 +1,37 @@
 //jshint esversion:6
-module.exports = cpmGenerate;
+module.exports = projGen;
 
-function criticalPathFinder(proj, job, currentPath){
-  const sucNr = proj.A[job].reduce((partialSum, a) => partialSum + a, 0); // sum of elements in P[job]
+// Global parameters
+const n = 10;
+const dMin = 1;
+const dMax = 10;
+const rMax = 3;
+const prNames = ["SPT", "LPT", "MIS", "MTS", "EST", "EFT", "LST", "LFT", "MF"];
+const prCount = prNames.length;
 
-  if (sucNr === 0) { //Job is ending node (currentPath is a new critical path)
-    var cumDur = 0;
-    for (var i = 0; i < currentPath.length; i++) { // cumulative duration of currentPath
-      cumDur = cumDur + proj.D[currentPath[i]];
-    }
-    if (cumDur === proj.makespan) { // if currentPath is one of the longest paths of the network
-      proj.cpNr++;
-      let newPath = currentPath.slice();
-      proj.cps.push(newPath);
-    }
-    currentPath.pop();
-    return;
-  } else {
-    for (var i = job + 1; i < proj.n; i++) {
-      if (proj.A[job][i] === 1) { // is a successor of Job
-        if (proj.caBool[i]) { // i is a critical acctivity
-          currentPath.push(i);
-          criticalPathFinder(proj, i, currentPath);
-        }
-      }
-    }
-    currentPath.pop();
-    return;
-  }
-}
-
-function cpmGenerate(){
-  // general parameters
-  const n = 10;
-  const dMin = 1;
-  const dMax = 10;
-  const timeHorizon = n * dMax;
-  const maxR = 3;
+function networkGen(proj, startBool, endBool){
+  // function parameters
   const pProb = 0.30;
   const pMax = n*(n-1)/2; // max theoretical number of transitive arcs
   const osMin = 0.45;
   const osMax = 0.65;
   const terminalMin = 2; // minimum number of terminal (start/end) nodes
   const terminalMax = 3; // maximum number of terminal (start/end) nodes
-  const rProb = 0.85; // probability threshold for resource assignment
-
-  var proj = {
-    n: n,
-    N: new Array(n),
-    D: new Array(n),
-    A: new Array(n),
-    P: new Array(n),
-    pStr:new Array(n),
-    R: new Array(n),
-    rNr: maxR,
-    makespan: 0,
-    es: new Array(n),
-    lf: new Array(n),
-    caBool: new Array(n),
-    cpNr: 0,
-    cps:[],
-    cpStr:[],
-    priority:new Array(n),
-    sgsSt: new Array(n),
-    sgsMakespan: 0,
-    pgsSt: new Array(n),
-    pgsMakespan: 0,
-    goNodes:[],
-    goLinks: []
-  };
-  for (var i = 0; i < n; i++) {
-    proj.A[i] = new Array(n);
-    proj.P[i] = new Array(n)
-  }
-  const alpha = Array.from(Array(n)).map((e, i) => i + 65);
-  proj.N = alpha.map((x) => String.fromCharCode(x));
 
   // Helping Vars
   var pRand;
   var pTransBool; // true if transitive predecessor
   var pCount; // counter of transitive arcs
   var pOs; // the order strength of a generated project
-  var projValidBool; // true if a generated project is feasible & acceptable
+  var networkValidBool; // true if a generated project is feasible & acceptable
   var startCount; // counter of starting nodes
   var endCount; // counter of ending nodes
   var xCounter; // helping counter
-  // Helping Arrays
-  var startBool = new Array(n); // true if starting node
-  var endBool = new Array(n); // true if ending node
-  var eligBool = new Array(n); // true if eligible activity
-  var addedBool = new Array(n); // true is activity added to the list
-  var rFree = new Array(maxR);
-  for (var i = 0; i < maxR; i++) {
-    rFree[i] = new Array(timeHorizon);
-  }
 
   // generate the project
   do {
     // initializations
     for (var i = 0; i < n; i++) {
-      proj.D[i] = 0;
       proj.pStr[i] = '';
       startBool[i] = false;
       endBool[i] = false;
@@ -111,12 +43,7 @@ function cpmGenerate(){
     pCount = 0; // OS counter
     startCount = 0; // starting nodes counter
     endCount = 0; // ending nodes counter
-    projValidBool = true; // project feasible and acceptable
-
-    // random durations
-    for (var i = 0; i < n; i++) {
-      proj.D[i] = Math.floor((Math.random() * dMax) + dMin);
-    }
+    networkValidBool = true; // project feasible and acceptable
 
     // random transitive network
     for (var i = 0; i < n; i++) {
@@ -164,17 +91,17 @@ function cpmGenerate(){
     for (var i = 0; i < n; i++) {
       for (var j = 0; j < n; j++) {
         if (proj.P[i][j] === 1 && proj.P[j][i] === 1) {
-          projValidBool = false;
+          networkValidBool = false;
           console.log("CPM Network Infeasible: Cycles detected! (i-->j-->i):", i, j);
           res.end();
         } else if (proj.P[i][j] === 1 && i >= j) {
-          projValidBool = false;
+          networkValidBool = false;
           console.log("CPM Network Infeasible: The topological order is wrong (i-->j && i>j):", i, j);
           res.end();
         }
         for (var k = i + 1; k < j; k++) {
           if (proj.P[i][k] === 1 && proj.P[k][j] === 1 && proj.P[i][j] !== 1) {
-            projValidBool = false;
+            networkValidBool = false;
             console.log("CPM Network Infeasible: Transitive arc missing (i,k,j): (i-->k && k-->j && i!->j):", i, k, j);
             res.end();
           }
@@ -185,12 +112,12 @@ function cpmGenerate(){
     // OS in range?
     pOs = pCount/pMax;
     if (pOs < osMin || pOs > osMax) {
-      projValidBool = false;
+      networkValidBool = false;
       // console.log("OS not acceptable");
     }
 
     // multiple ending nodes?
-    if (projValidBool) {
+    if (networkValidBool) {
       for (var i = 0; i < n; i++) {
         xCounter = proj.P[i].reduce((partialSum, a) => partialSum + a, 0); // sum of elements in P[i]
         if (xCounter === 0) { // no successors
@@ -199,13 +126,13 @@ function cpmGenerate(){
         }
       }
       if (endCount < terminalMin || endCount > terminalMax) {
-        projValidBool = false;
+        networkValidBool = false;
         // console.log("number of ending nodes not acceptable");
       }
     }
 
     // multiple starting nodes?
-    if (projValidBool) {
+    if (networkValidBool) {
       for (var i = 0; i < n; i++) {
         xCounter = 0;
         for (var j = 0; j < i; j++) {
@@ -220,39 +147,22 @@ function cpmGenerate(){
         }
       }
       if (startCount < terminalMin || startCount > terminalMax) {
-        projValidBool = false;
+        networkValidBool = false;
         // console.log("number of starting nodes not acceptable");
       }
     }
 
-    if (projValidBool) {
-      // assign resources
-      for (var i = 0; i < n; i++) {
-        proj.R[i] = maxR;
-        if(startBool[i]){
-          proj.R[i] = 0;
-        } else if (endBool[i]) {
-          proj.R[i] = 2;
-        } else {
-          proj.R[i] = 1;
-        }
-        if (proj.R[i] === maxR) {
-          console.log("Resource allocation error!");
-        }
-      }
+  } while (!networkValidBool);
+}
 
-
-    }
-
-  } while (!projValidBool);
-
+function cpm(proj){
   /////////////////// CPM calculations
   // forwarf pass
   proj.makespan = 0;
   for (var i = 0; i < n; i++) {
     proj.es[i] = 0;
     for (var j = 0; j < i; j++) {
-      if (proj.P[j][i] === 1) {
+      if (proj.A[j][i] === 1) {
         proj.es[i] = Math.max(proj.es[i], proj.es[j] + proj.D[j]);
       }
     }
@@ -262,7 +172,7 @@ function cpmGenerate(){
   for (var i = n - 1; i >= 0; i--) {
     proj.lf[i] = proj.makespan;
     for (var j = i + 1; j < n; j++) {
-      if (proj.P[i][j] === 1) {
+      if (proj.A[i][j] === 1) {
         proj.lf[i] = Math.min(proj.lf[i], proj.lf[j] - proj.D[j]);
       }
     }
@@ -275,11 +185,42 @@ function cpmGenerate(){
       proj.caBool[i] = false;
     }
   }
+}
 
+function nextCriticalPath(proj, job, currentPath){
+  const sucNr = proj.A[job].reduce((partialSum, a) => partialSum + a, 0); // sum of elements in P[job]
+
+  if (sucNr === 0) { //Job is ending node (currentPath is a new critical path)
+    var cumDur = 0;
+    for (var i = 0; i < currentPath.length; i++) { // cumulative duration of currentPath
+      cumDur = cumDur + proj.D[currentPath[i]];
+    }
+    if (cumDur === proj.makespan) { // if currentPath is one of the longest paths of the network
+      proj.cpNr++;
+      let newPath = currentPath.slice();
+      proj.cps.push(newPath);
+    }
+    currentPath.pop();
+    return;
+  } else {
+    for (var i = job + 1; i < proj.n; i++) {
+      if (proj.A[job][i] === 1) { // is a successor of Job
+        if (proj.caBool[i]) { // i is a critical acctivity
+          currentPath.push(i);
+          nextCriticalPath(proj, i, currentPath);
+        }
+      }
+    }
+    currentPath.pop();
+    return;
+  }
+}
+
+function allCriticalPaths(proj, startBool){
   //////////////////////// find critical paths
   for (var i = 0; i < n; i++) {
     if (startBool[i] && proj.caBool[i]) { // starting node & critical
-      criticalPathFinder(proj, i, [i]);
+      nextCriticalPath(proj, i, [i]);
     }
   }
   for (var i = 0; i < proj.cpNr; i++) { // creating cp names
@@ -290,9 +231,130 @@ function cpmGenerate(){
     }
     proj.cpStr.push(cpName);
   }
+}
 
+function prMinDur(proj, eligBool){
+  var selectedJob = n;
+  var minDur = dMax + 1;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i] && proj.D[i] < minDur) {
+      selectedJob = i;
+      minDur = proj.D[i];
+    }
+  }
+  return selectedJob;
+}
+
+function prMaxDur(proj, eligBool){
+  var selectedJob = n;
+  var maxDur = dMin - 1;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i] && proj.D[i] > maxDur) {
+      selectedJob = i;
+      maxDur = proj.D[i];
+    }
+  }
+  return selectedJob;
+}
+
+function prMaxIS(proj, eligBool){
+  var selectedJob = n;
+  var maxIS = -1;
+  var isNr = 0;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i]) {
+      isNr = proj.A[i].reduce((partialSum, a) => partialSum + a, 0);
+      if (isNr > maxIS) {
+        selectedJob = i;
+        maxIS = isNr;
+      }
+    }
+  }
+  return selectedJob;
+}
+
+function prMaxTS(proj, eligBool){
+  var selectedJob = n;
+  var maxTS = -1;
+  var tsNr = 0;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i]) {
+      tsNr = proj.P[i].reduce((partialSum, a) => partialSum + a, 0);
+      if (tsNr > maxTS) {
+        selectedJob = i;
+        maxTS = tsNr;
+      }
+    }
+  }
+  return selectedJob;
+}
+
+function prMinEst(proj, eligBool){
+  var selectedJob = n;
+  var minEst = proj.makespan + 1;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i] && proj.es[i] < minEst) {
+      selectedJob = i;
+      minEst = proj.es[i];
+    }
+  }
+  return selectedJob;
+}
+
+function prMinEft(proj, eligBool){
+  var selectedJob = n;
+  var minEft = proj.makespan + 1;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i] && (proj.es[i] + proj.D[i] < minEft)) {
+      selectedJob = i;
+      minEft = proj.es[i] + proj.D[i];
+    }
+  }
+  return selectedJob;
+}
+
+function prMinLst(proj, eligBool){
+  var selectedJob = n;
+  var minLst = proj.makespan + 1;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i] && (proj.lf[i] - proj.D[i] < minLst)) {
+      selectedJob = i;
+      minLst = proj.lf[i] - proj.D[i];
+    }
+  }
+  return selectedJob;
+}
+
+function prMinLft(proj, eligBool){
+  var selectedJob = n;
+  var minLft = proj.makespan + 1;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i] && (proj.lf[i] < minLft)) {
+      selectedJob = i;
+      minLft = proj.lf[i];
+    }
+  }
+  return selectedJob;
+}
+
+function prMinFloat(proj, eligBool){
+  var selectedJob = n;
+  var minFloat = proj.makespan + 1;
+  for (var i = 0; i < n; i++) {
+    if (eligBool[i] && (proj.lf[i] - proj.D[i] - proj.es[i] < minFloat)) {
+      selectedJob = i;
+      minFloat = proj.lf[i] - proj.D[i] - proj.es[i];
+    }
+  }
+  return selectedJob;
+}
+
+function priorityList(proj, startBool, priorityRuleNr){
   //////////////////////// Prioritize activities
   var addedCounter = 0;
+  var selectedJob = 0;
+  var eligBool = new Array(n); // true if eligible activity
+  var addedBool = new Array(n); // true is activity added to the list
   for (var i = 0; i < n; i++) {
     addedBool[i] = false;
     if (startBool[i]) {
@@ -301,18 +363,27 @@ function cpmGenerate(){
       eligBool[i] = false;
     }
   }
-  var minDur = dMax;
-  var selectedJob = 0;
   while (addedCounter < n) {
-    minDur = dMax + 1;
-    selectedJob = n;
-    for (var i = 0; i < n; i++) {
-      if (eligBool[i] && proj.D[i] < minDur) {
-        selectedJob = i;
-        minDur = proj.D[i];
-      }
+    if (priorityRuleNr === 0) {
+      selectedJob = prMinDur(proj, eligBool);
+    } else if (priorityRuleNr === 1){
+      selectedJob = prMaxDur(proj, eligBool);
+    } else if (priorityRuleNr === 2){
+      selectedJob = prMaxIS(proj, eligBool);
+    } else if (priorityRuleNr === 3){
+      selectedJob = prMaxTS(proj, eligBool);
+    } else if (priorityRuleNr === 4){
+      selectedJob = prMinEst(proj, eligBool);
+    } else if (priorityRuleNr === 5){
+      selectedJob = prMinEft(proj, eligBool);
+    } else if (priorityRuleNr === 6){
+      selectedJob = prMinLst(proj, eligBool);
+    } else if (priorityRuleNr === 7){
+      selectedJob = prMinLft(proj, eligBool);
+    } else if (priorityRuleNr === 8){
+      selectedJob = prMinFloat(proj, eligBool);
     }
-    proj.priority[addedCounter] = selectedJob;
+    proj.priority[priorityRuleNr][addedCounter] = selectedJob;
     addedCounter++;
     addedBool[selectedJob] = true;
     eligBool[selectedJob] = false;
@@ -327,24 +398,31 @@ function cpmGenerate(){
       }
     }
   }
+}
 
+function sgs(proj, priorityRuleNr){
   // Serial Schedule
+  const timeHorizon = n * dMax;
   var currentJob;
   var maxPredFt;
   var rFeasible;
-  var totalDur = 0;
+  var rFree = new Array(proj.rNr);
+  for (var i = 0; i < proj.rNr; i++) {
+    rFree[i] = new Array(timeHorizon);
+  }
+  proj.sgsMakespan[priorityRuleNr] = 0;
   for (var r = 0; r < proj.rNr; r++) {
     for (var t = 0; t < timeHorizon; t++) {
       rFree[r][t] = true;
     }
   }
   for (var i = 0; i < n; i++) {
-    currentJob = proj.priority[i];
-    proj.sgsSt[currentJob] = 0;
+    currentJob = proj.priority[priorityRuleNr][i];
+    proj.sgsSt[priorityRuleNr][currentJob] = 0;
     maxPredFt = 0;
     for (var j = 0; j < currentJob; j++) {
       if (proj.A[j][currentJob] === 1) {
-        maxPredFt = Math.max(maxPredFt, proj.sgsSt[j] + proj.D[j]);
+        maxPredFt = Math.max(maxPredFt, proj.sgsSt[priorityRuleNr][j] + proj.D[j]);
       }
     }
     for (var t = maxPredFt; t < timeHorizon; t++) {
@@ -357,8 +435,8 @@ function cpmGenerate(){
           }
         }
         if (rFeasible) {
-          proj.sgsSt[currentJob] = t;
-          totalDur = Math.max(totalDur, t + proj.D[currentJob]);
+          proj.sgsSt[priorityRuleNr][currentJob] = t;
+          proj.sgsMakespan[priorityRuleNr] = Math.max(proj.sgsMakespan[priorityRuleNr], t + proj.D[currentJob]);
           for (var u = t; u < t + proj.D[currentJob] ; u++) {
             rFree[proj.R[currentJob]][u] = false;
           }
@@ -367,29 +445,37 @@ function cpmGenerate(){
       }
     }
   }
-  proj.sgsMakespan = totalDur;
+}
 
-  // Parallel Schedule
-  totalDur = 0;
-  addedCounter = 0;
-  var predFeasible;
+function pgs(proj, priorityRuleNr){
+  const timeHorizon = n * dMax;
+  var currentJob = 0;
+  var addedCounter = 0;
+  var predFeasible = true;
+  var rFeasible = true;
+  var rFree = new Array(proj.rNr);
+  for (var i = 0; i < proj.rNr; i++) {
+    rFree[i] = new Array(timeHorizon);
+  }
+  var addedBool = new Array(n); // true is activity added to the list
   for (var i = 0; i < n; i++) {
-    proj.pgsSt[i] = 0;
     addedBool[i] = false;
+    proj.pgsSt[priorityRuleNr][i] = 0;
   }
   for (var r = 0; r < proj.rNr; r++) {
     for (var t = 0; t < timeHorizon; t++) {
       rFree[r][t] = true;
     }
   }
+  proj.pgsMakespan[priorityRuleNr] = 0;
   for (var t = 0; t < timeHorizon; t++) {
     for (var i = 0; i < n; i++) {
-      currentJob = proj.priority[i];
+      currentJob = proj.priority[priorityRuleNr][i];
       if (!addedBool[currentJob]) {
         predFeasible = true;
         for (var j = 0; j < currentJob; j++) {
           if (proj.A[j][currentJob] === 1){
-            if (!addedBool[j] || (proj.pgsSt[j] + proj.D[j] > t)) {
+            if (!addedBool[j] || (proj.pgsSt[priorityRuleNr][j] + proj.D[j] > t)) {
               predFeasible = false;
               break;
             }
@@ -404,13 +490,13 @@ function cpmGenerate(){
             }
           }
           if (rFeasible) {
-            proj.pgsSt[currentJob] = t;
+            proj.pgsSt[priorityRuleNr][currentJob] = t;
             addedBool[currentJob] = true;
             addedCounter++;
             for (var u = t; u < t + proj.D[currentJob]; u++) {
               rFree[proj.R[currentJob]][u] = false;
             }
-            totalDur = Math.max(totalDur, t + proj.D[currentJob]);
+            proj.pgsMakespan[priorityRuleNr] = Math.max(proj.pgsMakespan[priorityRuleNr], t + proj.D[currentJob]);
           }
         }
       }
@@ -422,8 +508,9 @@ function cpmGenerate(){
       break;
     }
   }
-  proj.pgsMakespan = totalDur;
+}
 
+function gojsArrays(proj, startBool, endBool){
   ///// gojs nodes and links arrays
   const startNode = { key: 0, text: "Start", length: 0, earlyStart: 0, lateFinish: 0, critical: true };
   proj.goNodes.push(startNode); // dummy start node
@@ -449,6 +536,112 @@ function cpmGenerate(){
       proj.goLinks.push(endLink);
     }
   }
+}
+
+function projGen(){
+
+  // create the project object
+  var proj = {
+    n: n,
+    N: new Array(n),
+    D: new Array(n),
+    A: new Array(n),
+    P: new Array(n),
+    pStr:new Array(n),
+    R: new Array(n),
+    rNr: rMax,
+    makespan: 0,
+    es: new Array(n),
+    lf: new Array(n),
+    caBool: new Array(n),
+    cpNr: 0,
+    cps:[],
+    cpStr:[],
+    prNr: 0,
+    prStr: prNames,
+    priority: new Array(prCount),
+    sgsSt: new Array(prCount),
+    sgsMakespan: new Array(prCount),
+    pgsSt: new Array(prCount),
+    pgsMakespan: new Array(prCount),
+    goNodes:[],
+    goLinks: []
+  };
+  for (var i = 0; i < n; i++) {
+    proj.A[i] = new Array(n);
+    proj.P[i] = new Array(n);
+  }
+  for (var i = 0; i < prCount; i++) {
+    proj.priority[i] = new Array(n);
+    proj.sgsSt[i] = new Array(n);
+    proj.pgsSt[i] = new Array(n);
+    proj.sgsMakespan[i] = 0;
+    proj.pgsMakespan[i] = 0;
+  }
+
+  // Activity names
+  const alpha = Array.from(Array(n)).map((e, i) => i + 65);
+  proj.N = alpha.map((x) => String.fromCharCode(x));
+
+  // Helping Vars & Arrays
+  var startBool = new Array(n); // true if starting node
+  var endBool = new Array(n); // true if ending node
+  var difSgsPgs = false;
+  var difPr = [];
+
+  do {
+
+    // random durations
+    for (var i = 0; i < n; i++) {
+      proj.D[i] = Math.floor((Math.random() * dMax) + dMin);
+    }
+
+    networkGen(proj, startBool, endBool);
+
+    // random resources
+    for (var i = 0; i < n; i++) {
+      proj.R[i] = proj.rNr;
+      if(startBool[i]){
+        proj.R[i] = 0;
+      } else if (endBool[i]) {
+        proj.R[i] = 2;
+      } else {
+        proj.R[i] = 1;
+      }
+      if (proj.R[i] === proj.rNr) {
+        console.log("Resource allocation error!");
+      }
+    }
+
+    cpm(proj);
+
+    allCriticalPaths(proj, startBool);
+
+    difSgsPgs = false;
+    for (var i = 0; i < 9; i++) {
+
+      priorityList(proj, startBool, i);
+      sgs(proj, i);
+      pgs(proj, i);
+
+      // console.log("pr:", i, " - sgsT:", proj.sgsMakespan[i], " - pgsT:", proj.pgsMakespan[i]);
+      if (proj.sgsMakespan[i] !== proj.pgsMakespan[i]) {
+        difSgsPgs = true;
+        difPr.push(i);
+      }
+    }
+    if (difSgsPgs) {
+      const rnd = Math.floor(Math.random()*difPr.length);
+      proj.prNr = difPr[rnd];
+      // console.log(difPr);
+      // console.log(rnd);
+      // console.log(proj.prNr);
+    }
+    // console.log("-----------");
+
+  } while (!difSgsPgs);
+
+  gojsArrays(proj, startBool, endBool);
 
   return proj;
 }

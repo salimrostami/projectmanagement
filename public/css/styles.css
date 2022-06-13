@@ -75,7 +75,7 @@ h1, h2, h3, h4, h5, h6 {
 .timetable{
   table-layout: fixed;
   width: 95%;
-  margin: 5% auto 0;
+  margin: 5% auto 5%;
 }
 
 /*log header*/
