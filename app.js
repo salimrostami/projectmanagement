@@ -9,6 +9,21 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const cpm = require(__dirname + "/cpm.js");
 
+//global params
+const prShortNames = ["SPT", "LPT", "MIS", "MTS", "EST", "EFT", "LST", "LFT", "MF"];
+const prFullNames = [
+  "Shortest Processing Time First",
+  "Longest Processing Time First",
+  "Most Immediate Successors First",
+  "Most Total Successors First",
+  "Minimum Earliest Start Time First",
+  "Minimum Earliest Finish Time First",
+  "Minimum Latest Start Time First",
+  "Minimum Latest Finish Time First",
+  "Minimum Float First"
+];
+const prCount = prShortNames.length;
+
 //Set up the app
 const app = express();
 app.set('view engine', 'ejs');
@@ -119,7 +134,25 @@ app.get("/cpm", function(req, res){
 app.get("/rl", function(req, res){
   if (req.isAuthenticated()) {
     const proj = cpm();
-    res.render("rl", {proj: proj, user: req.user});
+    res.render("rl", {proj: proj, prStr: prShortNames, prStrLong: prFullNames, user: req.user});
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.get("/pert", function(req, res){
+  if (req.isAuthenticated()) {
+    const proj = cpm();
+    res.render("pert", {proj: proj, user: req.user});
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.get("/msp", function(req, res){
+  if (req.isAuthenticated()) {
+    const proj = cpm();
+    res.render("msp", {proj: proj, user: req.user});
   } else {
     res.redirect("/login");
   }

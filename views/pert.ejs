@@ -1,0 +1,122 @@
+<%- include('partials/logHeader', {user: user}) %>
+<section class="exe-sec color2-sec">
+  <h2 class="sec-head">Program Evaluation and Review Technique: Exercise</h2>
+  <div class="container-fluid">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Activity</th>
+          <th scope="col">Average Duration (days)</th>
+          <th scope="col">Predecessors</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < proj.n; i++) { %>
+          <tr>
+            <th scope="row"><%=i+1%></th>
+            <td><%=proj.N[i]%></td>
+            <td><%=proj.D[i]%></td>
+            <td><%=proj.pStr[i]%></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <table class="table table-hover sol-table">
+      <thead>
+        <tr>
+          <th scope="col">Assigned Critical Path</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr>
+            <th scope="row"><%= proj.cpStr[0]%></td>
+          </tr>
+      </tbody>
+    </table>
+
+    <table class="table table-hover sol-table">
+      <thead>
+        <tr>
+          <th scope="col">Deviation Percentage</th>
+          <th scope="col">A Px Schedule</th>
+          <th scope="col">A Given Project Duration</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr>
+            <td><%= proj.pertDev%>%</td>
+            <td>P<%= proj.pertPx%></td>
+            <td><%= proj.pertDur%> days</td>
+          </tr>
+      </tbody>
+    </table>
+
+  </div>
+</section>
+
+<section class="sol-sec color3-sec">
+  <h2 class="sec-head">PERT Solution</h2>
+  <div class="container-fluid">
+
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col" rowspan="2">#</th>
+          <th scope="col" rowspan="2">Activity</th>
+          <th scope="col" colspan="3">Estimated Durations</th>
+          <th scope="col" colspan="2">Distribution</th>
+        </tr>
+        <tr>
+          <th scope="col">Min</th>
+          <th scope="col">Most Likely</th>
+          <th scope="col">Max</th>
+          <th scope="col">Mean</th>
+          <th scope="col">Variance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < proj.n; i++) { %>
+          <tr>
+            <th scope="row"><%=i+1%></th>
+            <td><%=proj.N[i]%></td>
+            <td><%=Math.round((((1-(proj.pertDev / 100)) * proj.D[i]) + Number.EPSILON) * 100) / 100%></td>
+            <td><%=proj.D[i]%></td>
+            <td><%=Math.round((((1+(proj.pertDev / 100)) * proj.D[i]) + Number.EPSILON) * 100) / 100%></td>
+            <td><%=proj.D[i]%></td>
+            <td><%= Math.round((Math.pow((((Math.round((((1+(proj.pertDev / 100)) * proj.D[i]) + Number.EPSILON) * 100) / 100) - (Math.round((((1-(proj.pertDev / 100)) * proj.D[i]) + Number.EPSILON) * 100) / 100))/6) , 2) + Number.EPSILON) * 100) / 100 %></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <table class="table table-hover sol-table" style="text-align: left">
+      <tbody>
+        <tr>
+          <th scope="row">The Critical Path:</th>
+          <td><%=proj.cpStr[0]%></td>
+        </tr>
+        <tr>
+          <th scope="row">Total Mean of the Critical Path:</th>
+          <td><%=proj.makespan%> days</td>
+        </tr>
+        <tr>
+          <th scope="row">Total Variance of the Critical Path:</th>
+          <td><%=proj.pertVar%></td>
+        </tr>
+        <tr>
+          <th scope="row">The duration of P<%=proj.pertPx%> Schedule:</th>
+          <td><%=proj.pertPxSol%> days</td>
+        </tr>
+        <tr>
+          <th scope="row">The Probability of Finishing the Project by <%=proj.pertDur%> Days:</th>
+          <td><%=Math.round(proj.pertDurSol*100)%>%</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

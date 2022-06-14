@@ -1,6 +1,6 @@
 <%- include('partials/logHeader', {user: user}) %>
 <section class="exe-sec color2-sec">
-  <h2 class="sec-head">Resource Leveling Exercise</h2>
+  <h2 class="sec-head">Resource Leveling: Exercise</h2>
   <div class="container-fluid">
     <table class="table table-hover">
       <thead>
@@ -28,12 +28,12 @@
     <table class="table table-hover sol-table">
       <thead>
         <tr>
-          <th scope="col">Priority Rule</th>
+          <th scope="col">Assigned Priority Rule:</th>
         </tr>
       </thead>
       <tbody>
           <tr>
-            <td><%= proj.prStr[proj.prNr] %></td>
+            <th scope="row"><%= prStr[proj.prNr] + ": " + prStrLong[proj.prNr] %></th>
           </tr>
       </tbody>
     </table>
@@ -41,7 +41,7 @@
 </section>
 
 <section class="sol-sec color3-sec">
-  <h2 class="sec-head">RL Solution: <%=proj.prStr[proj.prNr]%></h2>
+  <h2 class="sec-head">RL Solution: <%=prStr[proj.prNr]%></h2>
   <div class="container-fluid">
 
     <table class="table table-hover">
@@ -75,7 +75,7 @@
       </thead>
       <tbody>
           <tr>
-            <td scope="row"><%=proj.prStr[proj.prNr]%></td>
+            <td scope="row"><%=prStr[proj.prNr]%></td>
             <td><%= proj.sgsMakespan[proj.prNr] %></td>
             <td><%= proj.pgsMakespan[proj.prNr] %></td>
           </tr>
@@ -89,7 +89,7 @@
   <thead>
     <tr>
       <th scope="col" style="width: 100px; border-right: 1px solid;">Resource</th>
-      <th scope="col" colspan="<%=proj.sgsMakespan[proj.prNr]+1%>"><%=proj.prStr[proj.prNr]%> Priority Rule: SGS Schedule</th>
+      <th scope="col" colspan="<%=proj.sgsMakespan[proj.prNr]+1%>"><%=prStr[proj.prNr]%> Priority Rule: SGS Schedule</th>
     </tr>
   </thead>
   <tbody>
@@ -125,7 +125,7 @@
   <thead>
     <tr>
       <th scope="col" style="width: 100px; border-right: 1px solid;">Resource</th>
-      <th scope="col" colspan="<%=proj.pgsMakespan[proj.prNr]+1%>"><%=proj.prStr[proj.prNr]%> Priority Rule: PGS Schedule</th>
+      <th scope="col" colspan="<%=proj.pgsMakespan[proj.prNr]+1%>"><%=prStr[proj.prNr]%> Priority Rule: PGS Schedule</th>
     </tr>
   </thead>
   <tbody>
@@ -164,15 +164,15 @@
     <table class="table table-hover">
       <thead>
         <tr>
-          <th scope="col">Priority Rule</th>
+          <th scope="col" style="text-align: left">Priority Rule</th>
           <th scope="col">SGS Duration</th>
           <th scope="col">PGS Duration</th>
         </tr>
       </thead>
       <tbody>
-          <% for (var i = 0; i < proj.prStr.length; i++) {%>
+          <% for (var i = 0; i < prStr.length; i++) {%>
             <tr>
-              <td scope="row"><%=proj.prStr[i]%></td>
+              <td scope="row" style="text-align: left"><%=prStr[i] + ": " + prStrLong[i]%></td>
               <td><%= proj.sgsMakespan[i] %></td>
               <td><%= proj.pgsMakespan[i] %></td>
             </tr>

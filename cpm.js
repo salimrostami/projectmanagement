@@ -1,13 +1,38 @@
 //jshint esversion:6
 module.exports = projGen;
 
+//normal dist
+const gaussian = require('gaussian');
+// const distribution = gaussian(mean, variance);
+// Take a random sample using inverse transform sampling method.
+// var sample = distribution.ppf(Math.random());
+
 // Global parameters
 const n = 10;
 const dMin = 1;
 const dMax = 10;
 const rMax = 3;
-const prNames = ["SPT", "LPT", "MIS", "MTS", "EST", "EFT", "LST", "LFT", "MF"];
-const prCount = prNames.length;
+const prShortNames = ["SPT", "LPT", "MIS", "MTS", "EST", "EFT", "LST", "LFT", "MF"];
+const prFullNames = [
+  "Shortest Processing Time First",
+  "Longest Processing Time First",
+  "Most Immediate Successors First",
+  "Most Total Successors First",
+  "Minimum Earliest Start Time First",
+  "Minimum Earliest Finish Time First",
+  "Minimum Latest Start Time First",
+  "Minimum Latest Finish Time First",
+  "Minimum Float First"
+];
+const prCount = prShortNames.length;
+const pertDevMin = 30;
+const pertDevMax = 90;
+
+function roundToTwo(num) {
+  return Math.round((num + Number.EPSILON) * 100) / 100
+  // return +(Math.round(num + "e+2")  + "e-2");
+  // return Math.round(num * 100) / 100
+}
 
 function networkGen(proj, startBool, endBool){
   // function parameters
@@ -538,6 +563,46 @@ function gojsArrays(proj, startBool, endBool){
   }
 }
 
+function pert(proj){
+  //random dev percent
+  proj.pertDev = Math.floor(Math.random() * (pertDevMax-pertDevMin)) + pertDevMin;
+
+  // calc variance
+  var minVal = 0;
+  var maxVal = 0;
+  var jobVar = 0;
+  proj.pertVar = 0;
+  proj.cps[0].forEach((i)=>{
+    maxVal = roundToTwo((1+(proj.pertDev / 100)) * proj.D[i]);
+    minVal = roundToTwo((1-(proj.pertDev / 100)) * proj.D[i]);
+    jobVar = roundToTwo(Math.pow((maxVal - minVal)/6 , 2));
+    // console.log("job: ", proj.N[i], " min:", minVal, "  max:", maxVal, "  jVar:", jobVar);
+    proj.pertVar += jobVar;
+   });
+   proj.pertVar = roundToTwo(proj.pertVar);
+   // console.log("tVar:", proj.pertVar);
+   // console.log("-------------");
+
+  //random px
+  proj.pertPx = Math.floor(Math.random() * (95-75)) + 75;
+  const distribution = gaussian(proj.makespan, proj.pertVar);
+  proj.pertPxSol = roundToTwo(distribution.ppf(proj.pertPx / 100));
+
+  //Cumulative probability of a given project duration
+  proj.pertDur = roundToTwo(distribution.ppf((Math.floor(Math.random() * (74-55)) + 55)/100));
+  proj.pertDurSol = roundToTwo(distribution.cdf(proj.pertDur));
+
+  //Log the result
+  // console.log("percent: ", proj.pertDev/100);
+  // console.log("mean: ", proj.makespan);
+  // console.log("variance: ", proj.pertVar);
+  // console.log("Px: ", proj.pertPx/100);
+  // console.log("PxDur: ", proj.pertPxSol);
+  // console.log("Dur: ", proj.pertDur);
+  // console.log("DurProb: ", proj.pertDurSol);
+  // console.log("--------------");
+}
+
 function projGen(){
 
   // create the project object
@@ -558,14 +623,19 @@ function projGen(){
     cps:[],
     cpStr:[],
     prNr: 0,
-    prStr: prNames,
     priority: new Array(prCount),
     sgsSt: new Array(prCount),
     sgsMakespan: new Array(prCount),
     pgsSt: new Array(prCount),
     pgsMakespan: new Array(prCount),
     goNodes:[],
-    goLinks: []
+    goLinks: [],
+    pertDev: 0,
+    pertVar: 0,
+    pertPx: 0,
+    pertPxSol: 0,
+    pertDur: 0,
+    pertDurSol: 0
   };
   for (var i = 0; i < n; i++) {
     proj.A[i] = new Array(n);
@@ -615,8 +685,6 @@ function projGen(){
 
     cpm(proj);
 
-    allCriticalPaths(proj, startBool);
-
     difSgsPgs = false;
     for (var i = 0; i < 9; i++) {
 
@@ -624,7 +692,6 @@ function projGen(){
       sgs(proj, i);
       pgs(proj, i);
 
-      // console.log("pr:", i, " - sgsT:", proj.sgsMakespan[i], " - pgsT:", proj.pgsMakespan[i]);
       if (proj.sgsMakespan[i] !== proj.pgsMakespan[i]) {
         difSgsPgs = true;
         difPr.push(i);
@@ -633,15 +700,15 @@ function projGen(){
     if (difSgsPgs) {
       const rnd = Math.floor(Math.random()*difPr.length);
       proj.prNr = difPr[rnd];
-      // console.log(difPr);
-      // console.log(rnd);
-      // console.log(proj.prNr);
     }
-    // console.log("-----------");
 
   } while (!difSgsPgs);
 
+  allCriticalPaths(proj, startBool);
+
   gojsArrays(proj, startBool, endBool);
+
+  pert(proj);
 
   return proj;
 }
