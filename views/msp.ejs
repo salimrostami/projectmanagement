@@ -1,26 +1,86 @@
 <%- include('partials/logHeader', {user: user}) %>
+
 <section class="exe-sec color2-sec">
   <h2 class="sec-head">Microsoft Project: Exercise</h2>
   <div class="container-fluid">
     <table class="table table-hover">
       <thead>
         <tr>
-          <th scope="col">#</th>
-          <th scope="col">Activity</th>
-          <th scope="col">Duration</th>
-          <th scope="col">Predecessors</th>
-          <th scope="col">Resources</th>
+          <th scope="col" rowspan="2">#</th>
+          <th scope="col" rowspan="2">Activity</th>
+          <th scope="col" rowspan="2">Duration (days)</th>
+          <th scope="col" rowspan="2">Predecessors</th>
+          <th scope="col" colspan="3">Resource</th>
+        </tr>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Total Cost</th>
         </tr>
       </thead>
       <tbody>
-        <% for (var i = 0; i < proj.n; i++) { %>
+        <% for (var i = 0; i < params.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.N[i]%></td>
+            <td><%=params.N[i]%></td>
             <td><%=proj.D[i]%></td>
             <td><%=proj.pStr[i]%></td>
-            <td><%=proj.R[i]+1%></td>
+            <td><%=params.resNames[proj.R[i]]%></td>
+            <% if (proj.R[i] !== 1) { %>
+              <td><%=params.resTypeNames[proj.rType[i]]%></td>
+            <%} else {%>
+              <td style="color: #F38181;"><b>?</b></td>
+            <%}%>
+            <% if (proj.R[i] === 1) { %>
+              <td><%=proj.D[i] * params.hoursPerDay * proj.rCost[(proj.R[i] * params.rMax) + proj.rType[i]]%></td>
+            <%} else {%>
+              <td style="color: #F38181;"><b>?</b></td>
+            <%}%>
           </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <%var tInProjBool = new Array(params.rMax * params.rMax);%>
+    <%var rtCount = new Array(params.rMax);%>
+    <%for (var r = 0; r < params.rMax; r++) {%>
+      <%rtCount[r] = 0;%>
+      <%for (var t = 0; t < params.rMax; t++) {%>
+        <%tInProjBool[(r * params.rMax) + t] = false;%>
+      <%}%>
+    <%}%>
+    <%for (var i = 0; i < params.n; i++) {%>
+      <%if (!tInProjBool[(proj.R[i] * params.rMax) + proj.rType[i]]) {%>
+        <%tInProjBool[(proj.R[i] * params.rMax) + proj.rType[i]] = true;%>
+        <%rtCount[proj.R[i]]++;%>
+      <%}%>
+    <%}%>
+
+    <table class="table table-hover sol-table">
+      <thead>
+        <tr>
+          <th scope="col">Resource</th>
+          <th scope="col">Type</th>
+          <th scope="col">Cost (per hour)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var r = 0; r < params.rMax; r++) { %>
+          <% if (r !== 1) {%>
+            <% var rPrintBool = false; %>
+            <% for (var t = 0; t < params.rMax; t++) { %>
+              <% if (proj.rInProjBool[(r * params.rMax) + t]) {%>
+                <tr>
+                  <% if (!rPrintBool) {%>
+                    <td style="vertical-align: middle;" rowspan="<%=rtCount[r]%>"><%=params.resNames[r]%></td>
+                    <% rPrintBool = true; %>
+                  <%}%>
+                  <td><%=params.resTypeNames[t]%></td>
+                  <td><%=proj.rCost[(r * params.rMax) + t]%></td>
+                </tr>
+              <% } %>
+            <% } %>
+          <% } %>
         <% } %>
       </tbody>
     </table>
@@ -32,7 +92,74 @@
   <h2 class="sec-head">MSP Solution</h2>
   <div class="container-fluid">
 
-    To be added....
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col" rowspan="2">#</th>
+          <th scope="col" rowspan="2">Activity</th>
+          <th scope="col" rowspan="2">Duration (days)</th>
+          <th scope="col" rowspan="2">Predecessors</th>
+          <th scope="col" colspan="3">Resource</th>
+        </tr>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Total Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < params.n; i++) { %>
+          <tr>
+            <th scope="row"><%=i+1%></th>
+            <td><%=params.N[i]%></td>
+            <td><%=proj.D[i]%></td>
+            <td><%=proj.pStr[i]%></td>
+            <td><%=params.resNames[proj.R[i]]%></td>
+            <td><%=params.resTypeNames[proj.rType[i]]%></td>
+            <td><%=proj.D[i] * params.hoursPerDay * proj.rCost[(proj.R[i] * params.rMax) + proj.rType[i]]%></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <table class="table table-hover sol-table">
+      <thead>
+        <tr>
+          <th scope="col">Resource</th>
+          <th scope="col">Type</th>
+          <th scope="col">Cost (per hour)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% var r =1; %>
+        <% var rPrintBool = false; %>
+        <% for (var t = 0; t < params.rMax; t++) { %>
+          <% if (proj.rInProjBool[(r * params.rMax) + t]) {%>
+            <tr>
+              <% if (!rPrintBool) {%>
+                <td style="vertical-align: middle;" rowspan="<%=rtCount[r]%>"><%=params.resNames[r]%></td>
+                <% rPrintBool = true; %>
+              <%}%>
+              <td><%=params.resTypeNames[t]%></td>
+              <td><%=proj.rCost[(r * params.rMax) + t]%></td>
+            </tr>
+          <% } %>
+        <% } %>
+      </tbody>
+    </table>
+
+    <table class="table table-hover sol-table">
+      <thead>
+        <tr>
+          <th scope="col">Total Budget</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row"><%=proj.budget.toLocaleString('fr')%></td>
+        </tr>
+      </tbody>
+    </table>
 
   </div>
 </section>

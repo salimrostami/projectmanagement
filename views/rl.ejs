@@ -13,10 +13,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for (var i = 0; i < proj.n; i++) { %>
+        <% for (var i = 0; i < params.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.N[i]%></td>
+            <td><%=params.N[i]%></td>
             <td><%=proj.D[i]%></td>
             <td><%=proj.pStr[i]%></td>
             <td><%=proj.R[i]+1%></td>
@@ -33,7 +33,7 @@
       </thead>
       <tbody>
           <tr>
-            <th scope="row"><%= prStr[proj.prNr] + ": " + prStrLong[proj.prNr] %></th>
+            <th scope="row"><%= params.prAbr[proj.prNr] + ": " + params.prNames[proj.prNr] %></th>
           </tr>
       </tbody>
     </table>
@@ -41,7 +41,7 @@
 </section>
 
 <section class="sol-sec color3-sec">
-  <h2 class="sec-head">RL Solution: <%=prStr[proj.prNr]%></h2>
+  <h2 class="sec-head">RL Solution: <%=params.prAbr[proj.prNr]%></h2>
   <div class="container-fluid">
 
     <table class="table table-hover">
@@ -54,10 +54,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for (var i = 0; i < proj.n; i++) { %>
+        <% for (var i = 0; i < params.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.N[proj.priority[proj.prNr][i]]%></td>
+            <td><%=params.N[proj.priority[proj.prNr][i]]%></td>
             <td><%=proj.sgsSt[proj.prNr][proj.priority[proj.prNr][i]]%></td>
             <td><%=proj.pgsSt[proj.prNr][proj.priority[proj.prNr][i]]%></td>
           </tr>
@@ -75,7 +75,7 @@
       </thead>
       <tbody>
           <tr>
-            <td scope="row"><%=prStr[proj.prNr]%></td>
+            <td scope="row"><%=params.prAbr[proj.prNr]%></td>
             <td><%= proj.sgsMakespan[proj.prNr] %></td>
             <td><%= proj.pgsMakespan[proj.prNr] %></td>
           </tr>
@@ -89,18 +89,18 @@
   <thead>
     <tr>
       <th scope="col" style="width: 100px; border-right: 1px solid;">Resource</th>
-      <th scope="col" colspan="<%=proj.sgsMakespan[proj.prNr]+1%>"><%=prStr[proj.prNr]%> Priority Rule: SGS Schedule</th>
+      <th scope="col" colspan="<%=proj.sgsMakespan[proj.prNr]+1%>"><%=params.prAbr[proj.prNr]%> Priority Rule: SGS Schedule</th>
     </tr>
   </thead>
   <tbody>
-    <% for (var r = 0; r < proj.rNr; r++) { %>
+    <% for (var r = 0; r < params.rMax; r++) { %>
       <tr>
         <th scope="row" style="border-top: 1px solid; border-bottom: 1px solid; border-top: 1px solid;"><%=r+1%></th>
         <% for (var t = 0; t < proj.sgsMakespan[proj.prNr]+1; t++) { %>
           <% var schBool = false; %>
-          <% for (var i = 0; i < proj.n; i++) { %>
+          <% for (var i = 0; i < params.n; i++) { %>
             <%if ((proj.R[i] === r) && (proj.sgsSt[proj.prNr][i] === t)) {%>
-              <td colspan="<%=proj.D[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=proj.N[i]%></td>
+              <td colspan="<%=proj.D[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=params.N[i]%></td>
               <% schBool = true; %>
               <% t = t + proj.D[i] - 1;%>
               <% break; %>
@@ -125,18 +125,18 @@
   <thead>
     <tr>
       <th scope="col" style="width: 100px; border-right: 1px solid;">Resource</th>
-      <th scope="col" colspan="<%=proj.pgsMakespan[proj.prNr]+1%>"><%=prStr[proj.prNr]%> Priority Rule: PGS Schedule</th>
+      <th scope="col" colspan="<%=proj.pgsMakespan[proj.prNr]+1%>"><%=params.prAbr[proj.prNr]%> Priority Rule: PGS Schedule</th>
     </tr>
   </thead>
   <tbody>
-    <% for (var r = 0; r < proj.rNr; r++) { %>
+    <% for (var r = 0; r < params.rMax; r++) { %>
       <tr>
         <th scope="row" style="border-top: 1px solid; border-bottom: 1px solid; border-top: 1px solid;"><%=r+1%></th>
         <% for (var t = 0; t < proj.pgsMakespan[proj.prNr]+1; t++) { %>
           <% var schBool = false; %>
-          <% for (var i = 0; i < proj.n; i++) { %>
+          <% for (var i = 0; i < params.n; i++) { %>
             <%if ((proj.R[i] === r) && (proj.pgsSt[proj.prNr][i] === t)) {%>
-              <td colspan="<%=proj.D[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=proj.N[i]%></td>
+              <td colspan="<%=proj.D[i]%>" style="border: 1px solid; background-color:#95E1D3"><%=params.N[i]%></td>
               <% schBool = true; %>
               <% t = t + proj.D[i] - 1;%>
               <% break; %>
@@ -170,9 +170,9 @@
         </tr>
       </thead>
       <tbody>
-          <% for (var i = 0; i < prStr.length; i++) {%>
+          <% for (var i = 0; i < params.prAbr.length; i++) {%>
             <tr>
-              <td scope="row" style="text-align: left"><%=prStr[i] + ": " + prStrLong[i]%></td>
+              <td scope="row" style="text-align: left"><%=params.prAbr[i] + ": " + params.prNames[i]%></td>
               <td><%= proj.sgsMakespan[i] %></td>
               <td><%= proj.pgsMakespan[i] %></td>
             </tr>
@@ -291,22 +291,6 @@
               new go.Binding("fill", "", linkColorConverter))
           );
 
-        // here's the data defining the graph
-        // const jsonProj = <%- JSON.stringify(proj) %>;
-        // var nodeDataArray = [];
-        // for (var i = 0; i < jsonProj.n; i++) {
-        //   const newNode = { key: i, text: jsonProj.N[i], length: jsonProj.D[i], earlyStart: jsonProj.es[i], lateFinish: jsonProj.lf[i], critical: jsonProj.caBool[i] };
-        //   nodeDataArray.push(newNode);
-        // }
-        // var linkDataArray = [];
-        // for (var i = 0; i < jsonProj.n; i++) {
-        //   for (var j = i+1; j < jsonProj.n; j++) {
-        //     if (jsonProj.arcs[i][j] === 1) {
-        //       const newLink = { from: i, to: j };
-        //       linkDataArray.push(newLink);
-        //     }
-        //   }
-        // }
         var nodeDataArray = <%- JSON.stringify(proj.goNodes) %>;
         var linkDataArray = <%- JSON.stringify(proj.goLinks) %>;
         // var nodeDataArray = [

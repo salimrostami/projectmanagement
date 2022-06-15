@@ -1,6 +1,8 @@
 //jshint esversion:6
 module.exports = projGen;
 
+const paramsModule = require(__dirname + "/params.js");
+
 //normal dist
 const gaussian = require('gaussian');
 // const distribution = gaussian(mean, variance);
@@ -8,25 +10,7 @@ const gaussian = require('gaussian');
 // var sample = distribution.ppf(Math.random());
 
 // Global parameters
-const n = 10;
-const dMin = 1;
-const dMax = 10;
-const rMax = 3;
-const prShortNames = ["SPT", "LPT", "MIS", "MTS", "EST", "EFT", "LST", "LFT", "MF"];
-const prFullNames = [
-  "Shortest Processing Time First",
-  "Longest Processing Time First",
-  "Most Immediate Successors First",
-  "Most Total Successors First",
-  "Minimum Earliest Start Time First",
-  "Minimum Earliest Finish Time First",
-  "Minimum Latest Start Time First",
-  "Minimum Latest Finish Time First",
-  "Minimum Float First"
-];
-const prCount = prShortNames.length;
-const pertDevMin = 30;
-const pertDevMax = 90;
+const params = paramsModule();
 
 function roundToTwo(num) {
   return Math.round((num + Number.EPSILON) * 100) / 100
@@ -34,10 +18,14 @@ function roundToTwo(num) {
   // return Math.round(num * 100) / 100
 }
 
+function intBetween(min, max){
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 function networkGen(proj, startBool, endBool){
   // function parameters
   const pProb = 0.30;
-  const pMax = n*(n-1)/2; // max theoretical number of transitive arcs
+  const pMax = params.n*(params.n-1)/2; // max theoretical number of transitive arcs
   const osMin = 0.45;
   const osMax = 0.65;
   const terminalMin = 2; // minimum number of terminal (start/end) nodes
@@ -56,11 +44,11 @@ function networkGen(proj, startBool, endBool){
   // generate the project
   do {
     // initializations
-    for (var i = 0; i < n; i++) {
+    for (var i = 0; i < params.n; i++) {
       proj.pStr[i] = '';
       startBool[i] = false;
       endBool[i] = false;
-      for (var j = 0; j < n; j++) {
+      for (var j = 0; j < params.n; j++) {
         proj.P[i][j] = 0;
         proj.A[i][j] = 0;
       }
@@ -71,8 +59,8 @@ function networkGen(proj, startBool, endBool){
     networkValidBool = true; // project feasible and acceptable
 
     // random transitive network
-    for (var i = 0; i < n; i++) {
-      for (var j = 0; j < n; j++) {
+    for (var i = 0; i < params.n; i++) {
+      for (var j = 0; j < params.n; j++) {
         if (i < j) { // topological order
           pRand = Math.random();
           if (pRand < pProb) { // random precedences
@@ -90,8 +78,8 @@ function networkGen(proj, startBool, endBool){
     }
 
     // immediate arcs
-    for (var i = 0; i < n; i++) {
-      for (var j = 0; j < n; j++) {
+    for (var i = 0; i < params.n; i++) {
+      for (var j = 0; j < params.n; j++) {
         if (i < j && proj.P[i][j] === 1) { // topological order
           pTransBool = false;
           for (var k = i+1; k < j; k++) { // transitive predecessor?
@@ -103,9 +91,9 @@ function networkGen(proj, startBool, endBool){
           if (!pTransBool) { // if not transitive, then immediate
             proj.A[i][j] = 1; // immediate predecessor
             if (proj.pStr[j].length > 0) {
-              proj.pStr[j] = proj.pStr[j] + ", " + proj.N[i];
+              proj.pStr[j] = proj.pStr[j] + ", " + params.N[i];
             } else {
-              proj.pStr[j] = proj.pStr[j] + proj.N[i];
+              proj.pStr[j] = proj.pStr[j] + params.N[i];
             }
           }
         }
@@ -113,8 +101,8 @@ function networkGen(proj, startBool, endBool){
     }
 
     // network feasible?
-    for (var i = 0; i < n; i++) {
-      for (var j = 0; j < n; j++) {
+    for (var i = 0; i < params.n; i++) {
+      for (var j = 0; j < params.n; j++) {
         if (proj.P[i][j] === 1 && proj.P[j][i] === 1) {
           networkValidBool = false;
           console.log("CPM Network Infeasible: Cycles detected! (i-->j-->i):", i, j);
@@ -143,7 +131,7 @@ function networkGen(proj, startBool, endBool){
 
     // multiple ending nodes?
     if (networkValidBool) {
-      for (var i = 0; i < n; i++) {
+      for (var i = 0; i < params.n; i++) {
         xCounter = proj.P[i].reduce((partialSum, a) => partialSum + a, 0); // sum of elements in P[i]
         if (xCounter === 0) { // no successors
           endCount++;
@@ -158,7 +146,7 @@ function networkGen(proj, startBool, endBool){
 
     // multiple starting nodes?
     if (networkValidBool) {
-      for (var i = 0; i < n; i++) {
+      for (var i = 0; i < params.n; i++) {
         xCounter = 0;
         for (var j = 0; j < i; j++) {
           if (proj.P[j][i] === 1) {
@@ -184,7 +172,7 @@ function cpm(proj){
   /////////////////// CPM calculations
   // forwarf pass
   proj.makespan = 0;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     proj.es[i] = 0;
     for (var j = 0; j < i; j++) {
       if (proj.A[j][i] === 1) {
@@ -194,16 +182,16 @@ function cpm(proj){
     proj.makespan = Math.max(proj.makespan, proj.es[i] + proj.D[i]);
   }
   //backward pass
-  for (var i = n - 1; i >= 0; i--) {
+  for (var i = params.n - 1; i >= 0; i--) {
     proj.lf[i] = proj.makespan;
-    for (var j = i + 1; j < n; j++) {
+    for (var j = i + 1; j < params.n; j++) {
       if (proj.A[i][j] === 1) {
         proj.lf[i] = Math.min(proj.lf[i], proj.lf[j] - proj.D[j]);
       }
     }
   }
   // Floats
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (proj.lf[i] - proj.D[i] - proj.es[i] == 0) {
       proj.caBool[i] = true;
     } else {
@@ -228,7 +216,7 @@ function nextCriticalPath(proj, job, currentPath){
     currentPath.pop();
     return;
   } else {
-    for (var i = job + 1; i < proj.n; i++) {
+    for (var i = job + 1; i < params.n; i++) {
       if (proj.A[job][i] === 1) { // is a successor of Job
         if (proj.caBool[i]) { // i is a critical acctivity
           currentPath.push(i);
@@ -243,25 +231,25 @@ function nextCriticalPath(proj, job, currentPath){
 
 function allCriticalPaths(proj, startBool){
   //////////////////////// find critical paths
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (startBool[i] && proj.caBool[i]) { // starting node & critical
       nextCriticalPath(proj, i, [i]);
     }
   }
   for (var i = 0; i < proj.cpNr; i++) { // creating cp names
     let cpName = '';
-    cpName = cpName + proj.N[proj.cps[i][0]];
+    cpName = cpName + params.N[proj.cps[i][0]];
     for (var j = 1; j < proj.cps[i].length; j++) {
-      cpName = cpName + '-' + proj.N[proj.cps[i][j]];
+      cpName = cpName + '-' + params.N[proj.cps[i][j]];
     }
     proj.cpStr.push(cpName);
   }
 }
 
 function prMinDur(proj, eligBool){
-  var selectedJob = n;
-  var minDur = dMax + 1;
-  for (var i = 0; i < n; i++) {
+  var selectedJob = params.n;
+  var minDur = params.dMax + 1;
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i] && proj.D[i] < minDur) {
       selectedJob = i;
       minDur = proj.D[i];
@@ -271,9 +259,9 @@ function prMinDur(proj, eligBool){
 }
 
 function prMaxDur(proj, eligBool){
-  var selectedJob = n;
-  var maxDur = dMin - 1;
-  for (var i = 0; i < n; i++) {
+  var selectedJob = params.n;
+  var maxDur = params.dMin - 1;
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i] && proj.D[i] > maxDur) {
       selectedJob = i;
       maxDur = proj.D[i];
@@ -283,10 +271,10 @@ function prMaxDur(proj, eligBool){
 }
 
 function prMaxIS(proj, eligBool){
-  var selectedJob = n;
+  var selectedJob = params.n;
   var maxIS = -1;
   var isNr = 0;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i]) {
       isNr = proj.A[i].reduce((partialSum, a) => partialSum + a, 0);
       if (isNr > maxIS) {
@@ -299,10 +287,10 @@ function prMaxIS(proj, eligBool){
 }
 
 function prMaxTS(proj, eligBool){
-  var selectedJob = n;
+  var selectedJob = params.n;
   var maxTS = -1;
   var tsNr = 0;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i]) {
       tsNr = proj.P[i].reduce((partialSum, a) => partialSum + a, 0);
       if (tsNr > maxTS) {
@@ -315,9 +303,9 @@ function prMaxTS(proj, eligBool){
 }
 
 function prMinEst(proj, eligBool){
-  var selectedJob = n;
+  var selectedJob = params.n;
   var minEst = proj.makespan + 1;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i] && proj.es[i] < minEst) {
       selectedJob = i;
       minEst = proj.es[i];
@@ -327,9 +315,9 @@ function prMinEst(proj, eligBool){
 }
 
 function prMinEft(proj, eligBool){
-  var selectedJob = n;
+  var selectedJob = params.n;
   var minEft = proj.makespan + 1;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i] && (proj.es[i] + proj.D[i] < minEft)) {
       selectedJob = i;
       minEft = proj.es[i] + proj.D[i];
@@ -339,9 +327,9 @@ function prMinEft(proj, eligBool){
 }
 
 function prMinLst(proj, eligBool){
-  var selectedJob = n;
+  var selectedJob = params.n;
   var minLst = proj.makespan + 1;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i] && (proj.lf[i] - proj.D[i] < minLst)) {
       selectedJob = i;
       minLst = proj.lf[i] - proj.D[i];
@@ -351,9 +339,9 @@ function prMinLst(proj, eligBool){
 }
 
 function prMinLft(proj, eligBool){
-  var selectedJob = n;
+  var selectedJob = params.n;
   var minLft = proj.makespan + 1;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i] && (proj.lf[i] < minLft)) {
       selectedJob = i;
       minLft = proj.lf[i];
@@ -363,9 +351,9 @@ function prMinLft(proj, eligBool){
 }
 
 function prMinFloat(proj, eligBool){
-  var selectedJob = n;
+  var selectedJob = params.n;
   var minFloat = proj.makespan + 1;
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (eligBool[i] && (proj.lf[i] - proj.D[i] - proj.es[i] < minFloat)) {
       selectedJob = i;
       minFloat = proj.lf[i] - proj.D[i] - proj.es[i];
@@ -378,9 +366,9 @@ function priorityList(proj, startBool, priorityRuleNr){
   //////////////////////// Prioritize activities
   var addedCounter = 0;
   var selectedJob = 0;
-  var eligBool = new Array(n); // true if eligible activity
-  var addedBool = new Array(n); // true is activity added to the list
-  for (var i = 0; i < n; i++) {
+  var eligBool = new Array(params.n); // true if eligible activity
+  var addedBool = new Array(params.n); // true is activity added to the list
+  for (var i = 0; i < params.n; i++) {
     addedBool[i] = false;
     if (startBool[i]) {
       eligBool[i] = true;
@@ -388,7 +376,7 @@ function priorityList(proj, startBool, priorityRuleNr){
       eligBool[i] = false;
     }
   }
-  while (addedCounter < n) {
+  while (addedCounter < params.n) {
     if (priorityRuleNr === 0) {
       selectedJob = prMinDur(proj, eligBool);
     } else if (priorityRuleNr === 1){
@@ -412,7 +400,7 @@ function priorityList(proj, startBool, priorityRuleNr){
     addedCounter++;
     addedBool[selectedJob] = true;
     eligBool[selectedJob] = false;
-    for (var i = selectedJob + 1; i < n; i++) {
+    for (var i = selectedJob + 1; i < params.n; i++) {
       if ((proj.A[selectedJob][i] === 1)) {
         eligBool[i] = true;
         for (var j = 0; j < i; j++) {
@@ -427,21 +415,21 @@ function priorityList(proj, startBool, priorityRuleNr){
 
 function sgs(proj, priorityRuleNr){
   // Serial Schedule
-  const timeHorizon = n * dMax;
+  const timeHorizon = params.n * params.dMax;
   var currentJob;
   var maxPredFt;
   var rFeasible;
-  var rFree = new Array(proj.rNr);
-  for (var i = 0; i < proj.rNr; i++) {
+  var rFree = new Array(params.rMax);
+  for (var i = 0; i < params.rMax; i++) {
     rFree[i] = new Array(timeHorizon);
   }
   proj.sgsMakespan[priorityRuleNr] = 0;
-  for (var r = 0; r < proj.rNr; r++) {
+  for (var r = 0; r < params.rMax; r++) {
     for (var t = 0; t < timeHorizon; t++) {
       rFree[r][t] = true;
     }
   }
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     currentJob = proj.priority[priorityRuleNr][i];
     proj.sgsSt[priorityRuleNr][currentJob] = 0;
     maxPredFt = 0;
@@ -473,28 +461,28 @@ function sgs(proj, priorityRuleNr){
 }
 
 function pgs(proj, priorityRuleNr){
-  const timeHorizon = n * dMax;
+  const timeHorizon = params.n * params.dMax;
   var currentJob = 0;
   var addedCounter = 0;
   var predFeasible = true;
   var rFeasible = true;
-  var rFree = new Array(proj.rNr);
-  for (var i = 0; i < proj.rNr; i++) {
+  var rFree = new Array(params.rMax);
+  for (var i = 0; i < params.rMax; i++) {
     rFree[i] = new Array(timeHorizon);
   }
-  var addedBool = new Array(n); // true is activity added to the list
-  for (var i = 0; i < n; i++) {
+  var addedBool = new Array(params.n); // true is activity added to the list
+  for (var i = 0; i < params.n; i++) {
     addedBool[i] = false;
     proj.pgsSt[priorityRuleNr][i] = 0;
   }
-  for (var r = 0; r < proj.rNr; r++) {
+  for (var r = 0; r < params.rMax; r++) {
     for (var t = 0; t < timeHorizon; t++) {
       rFree[r][t] = true;
     }
   }
   proj.pgsMakespan[priorityRuleNr] = 0;
   for (var t = 0; t < timeHorizon; t++) {
-    for (var i = 0; i < n; i++) {
+    for (var i = 0; i < params.n; i++) {
       currentJob = proj.priority[priorityRuleNr][i];
       if (!addedBool[currentJob]) {
         predFeasible = true;
@@ -525,11 +513,11 @@ function pgs(proj, priorityRuleNr){
           }
         }
       }
-      if (addedCounter === n) {
+      if (addedCounter === params.n) {
         break;
       }
     }
-    if (addedCounter === n) {
+    if (addedCounter === params.n) {
       break;
     }
   }
@@ -539,25 +527,25 @@ function gojsArrays(proj, startBool, endBool){
   ///// gojs nodes and links arrays
   const startNode = { key: 0, text: "Start", length: 0, earlyStart: 0, lateFinish: 0, critical: true };
   proj.goNodes.push(startNode); // dummy start node
-  const endNode = { key: n+1, text: "End", length: 0, earlyStart: proj.makespan, lateFinish: proj.makespan, critical: true };
+  const endNode = { key: params.n+1, text: "End", length: 0, earlyStart: proj.makespan, lateFinish: proj.makespan, critical: true };
   proj.goNodes.push(endNode); // dummy end node
-  for (var i = 0; i < n; i++) { // real nodes
-    const newNode = { key: i+1, text: proj.N[i], length: proj.D[i], earlyStart: proj.es[i], lateFinish: proj.lf[i], critical: proj.caBool[i] };
+  for (var i = 0; i < params.n; i++) { // real nodes
+    const newNode = { key: i+1, text: params.N[i], length: proj.D[i], earlyStart: proj.es[i], lateFinish: proj.lf[i], critical: proj.caBool[i] };
     proj.goNodes.push(newNode);
   }
-  for (var i = 0; i < n; i++) {
+  for (var i = 0; i < params.n; i++) {
     if (startBool[i]) {
       const startLink = { from: 0, to: i+1 };
       proj.goLinks.push(startLink);
     }
-    for (var j = i+1; j < n; j++) {
+    for (var j = i+1; j < params.n; j++) {
       if (proj.A[i][j] === 1) {
         const newLink = { from: i+1, to: j+1 };
         proj.goLinks.push(newLink);
       }
     }
     if (endBool[i]) {
-      const endLink = { from: i+1, to: n+1 };
+      const endLink = { from: i+1, to: params.n+1 };
       proj.goLinks.push(endLink);
     }
   }
@@ -565,7 +553,7 @@ function gojsArrays(proj, startBool, endBool){
 
 function pert(proj){
   //random dev percent
-  proj.pertDev = Math.floor(Math.random() * (pertDevMax-pertDevMin)) + pertDevMin;
+  proj.pertDev = intBetween(params.pertDevMin, params.pertDevMax); //Math.floor(Math.random() * (params.pertDevMax-params.pertDevMin)) + params.pertDevMin;
 
   // calc variance
   var minVal = 0;
@@ -576,7 +564,7 @@ function pert(proj){
     maxVal = roundToTwo((1+(proj.pertDev / 100)) * proj.D[i]);
     minVal = roundToTwo((1-(proj.pertDev / 100)) * proj.D[i]);
     jobVar = roundToTwo(Math.pow((maxVal - minVal)/6 , 2));
-    // console.log("job: ", proj.N[i], " min:", minVal, "  max:", maxVal, "  jVar:", jobVar);
+    // console.log("job: ", params.N[i], " min:", minVal, "  max:", maxVal, "  jVar:", jobVar);
     proj.pertVar += jobVar;
    });
    proj.pertVar = roundToTwo(proj.pertVar);
@@ -584,12 +572,12 @@ function pert(proj){
    // console.log("-------------");
 
   //random px
-  proj.pertPx = Math.floor(Math.random() * (95-75)) + 75;
+  proj.pertPx = intBetween(75, 95); //Math.floor(Math.random() * (95-75)) + 75;
   const distribution = gaussian(proj.makespan, proj.pertVar);
   proj.pertPxSol = roundToTwo(distribution.ppf(proj.pertPx / 100));
 
   //Cumulative probability of a given project duration
-  proj.pertDur = roundToTwo(distribution.ppf((Math.floor(Math.random() * (74-55)) + 55)/100));
+  proj.pertDur = roundToTwo(distribution.ppf(intBetween(55, 74)/100)); //(Math.floor(Math.random() * (74-55)) + 55)
   proj.pertDurSol = roundToTwo(distribution.cdf(proj.pertDur));
 
   //Log the result
@@ -603,31 +591,69 @@ function pert(proj){
   // console.log("--------------");
 }
 
+function msp(proj){
+  var rRand = 0;
+
+  for (var r = 0; r < params.rMax; r++) {
+    for (var t = 0; t < params.rMax; t++) {
+      proj.rInProjBool[(r * params.rMax) + t] = false;
+    }
+  }
+
+  // random resources
+  for (var i = 0; i < params.n; i++) {
+    rRand = Math.random();
+    if(rRand < 0.333){
+      proj.rType[i] = 0;
+    } else if (rRand < 0.666) {
+      proj.rType[i] = 1;
+    } else {
+      proj.rType[i] = 2;
+    }
+    proj.rInProjBool[(proj.R[i] * params.rMax) + proj.rType[i]] = true;
+  }
+
+  for (var r = 0; r < params.rMax; r++) {
+    for (var t = 0; t < params.rMax; t++) {
+      proj.rCost[(r * params.rMax) + t] = intBetween(params.rcMin[t], params.rcMax[t]);
+    }
+  }
+
+  proj.budget = 0;
+  for (var i = 0; i < params.n; i++) {
+    proj.budget += proj.D[i] * params.hoursPerDay * proj.rCost[(proj.R[i] * params.rMax) + proj.rType[i]];
+    // console.log("job:", i, "  R:", proj.R[i], " T:", proj.rType[i], " RC:", proj.rCost[(proj.R[i] * params.rMax) + proj.rType[i]], "TC: ", proj.D[i] * params.hoursPerDay * proj.rCost[(proj.R[i] * params.rMax) + proj.rType[i]]);
+  }
+  // console.log(proj.budget);
+  // console.log("--------");
+}
+
 function projGen(){
 
   // create the project object
   var proj = {
-    n: n,
-    N: new Array(n),
-    D: new Array(n),
-    A: new Array(n),
-    P: new Array(n),
-    pStr:new Array(n),
-    R: new Array(n),
-    rNr: rMax,
+    D: new Array(params.n),
+    A: new Array(params.n),
+    P: new Array(params.n),
+    pStr:new Array(params.n),
+    R: new Array(params.n),
+    rType: new Array(params.n),
+    rCost: new Array(params.rMax * params.rMax),
+    rInProjBool: new Array(params.rMax * params.rMax),
+    budget: 0,
     makespan: 0,
-    es: new Array(n),
-    lf: new Array(n),
-    caBool: new Array(n),
+    es: new Array(params.n),
+    lf: new Array(params.n),
+    caBool: new Array(params.n),
     cpNr: 0,
     cps:[],
     cpStr:[],
     prNr: 0,
-    priority: new Array(prCount),
-    sgsSt: new Array(prCount),
-    sgsMakespan: new Array(prCount),
-    pgsSt: new Array(prCount),
-    pgsMakespan: new Array(prCount),
+    priority: new Array(params.prCount),
+    sgsSt: new Array(params.prCount),
+    sgsMakespan: new Array(params.prCount),
+    pgsSt: new Array(params.prCount),
+    pgsMakespan: new Array(params.prCount),
     goNodes:[],
     goLinks: [],
     pertDev: 0,
@@ -637,40 +663,36 @@ function projGen(){
     pertDur: 0,
     pertDurSol: 0
   };
-  for (var i = 0; i < n; i++) {
-    proj.A[i] = new Array(n);
-    proj.P[i] = new Array(n);
+  for (var i = 0; i < params.n; i++) {
+    proj.A[i] = new Array(params.n);
+    proj.P[i] = new Array(params.n);
   }
-  for (var i = 0; i < prCount; i++) {
-    proj.priority[i] = new Array(n);
-    proj.sgsSt[i] = new Array(n);
-    proj.pgsSt[i] = new Array(n);
+  for (var i = 0; i < params.prCount; i++) {
+    proj.priority[i] = new Array(params.n);
+    proj.sgsSt[i] = new Array(params.n);
+    proj.pgsSt[i] = new Array(params.n);
     proj.sgsMakespan[i] = 0;
     proj.pgsMakespan[i] = 0;
   }
 
-  // Activity names
-  const alpha = Array.from(Array(n)).map((e, i) => i + 65);
-  proj.N = alpha.map((x) => String.fromCharCode(x));
-
   // Helping Vars & Arrays
-  var startBool = new Array(n); // true if starting node
-  var endBool = new Array(n); // true if ending node
+  var startBool = new Array(params.n); // true if starting node
+  var endBool = new Array(params.n); // true if ending node
   var difSgsPgs = false;
   var difPr = [];
 
   do {
 
     // random durations
-    for (var i = 0; i < n; i++) {
-      proj.D[i] = Math.floor((Math.random() * dMax) + dMin);
+    for (var i = 0; i < params.n; i++) {
+      proj.D[i] = Math.floor((Math.random() * params.dMax) + params.dMin);
     }
 
     networkGen(proj, startBool, endBool);
 
     // random resources
-    for (var i = 0; i < n; i++) {
-      proj.R[i] = proj.rNr;
+    for (var i = 0; i < params.n; i++) {
+      proj.R[i] = params.rMax;
       if(startBool[i]){
         proj.R[i] = 0;
       } else if (endBool[i]) {
@@ -678,7 +700,7 @@ function projGen(){
       } else {
         proj.R[i] = 1;
       }
-      if (proj.R[i] === proj.rNr) {
+      if (proj.R[i] === params.rMax) {
         console.log("Resource allocation error!");
       }
     }
@@ -698,7 +720,7 @@ function projGen(){
       }
     }
     if (difSgsPgs) {
-      const rnd = Math.floor(Math.random()*difPr.length);
+      const rnd = intBetween(0, difPr.length); //Math.floor(Math.random()*difPr.length);
       proj.prNr = difPr[rnd];
     }
 
@@ -709,6 +731,8 @@ function projGen(){
   gojsArrays(proj, startBool, endBool);
 
   pert(proj);
+
+  msp(proj);
 
   return proj;
 }

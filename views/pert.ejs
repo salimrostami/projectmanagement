@@ -12,10 +12,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for (var i = 0; i < proj.n; i++) { %>
+        <% for (var i = 0; i < params.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.N[i]%></td>
+            <td><%=params.N[i]%></td>
             <td><%=proj.D[i]%></td>
             <td><%=proj.pStr[i]%></td>
           </tr>
@@ -77,10 +77,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for (var i = 0; i < proj.n; i++) { %>
+        <% for (var i = 0; i < params.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.N[i]%></td>
+            <td><%=params.N[i]%></td>
             <td><%=Math.round((((1-(proj.pertDev / 100)) * proj.D[i]) + Number.EPSILON) * 100) / 100%></td>
             <td><%=proj.D[i]%></td>
             <td><%=Math.round((((1+(proj.pertDev / 100)) * proj.D[i]) + Number.EPSILON) * 100) / 100%></td>

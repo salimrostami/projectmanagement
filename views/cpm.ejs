@@ -12,10 +12,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for (var i = 0; i < proj.n; i++) { %>
+        <% for (var i = 0; i < params.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.N[i]%></td>
+            <td><%=params.N[i]%></td>
             <td><%=proj.D[i]%></td>
             <td><%=proj.pStr[i]%></td>
           </tr>
@@ -42,10 +42,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for (var i = 0; i < proj.n; i++) { %>
+        <% for (var i = 0; i < params.n; i++) { %>
           <tr>
             <th scope="row"><%=i+1%></th>
-            <td><%=proj.N[i]%></td>
+            <td><%=params.N[i]%></td>
             <td><%=proj.es[i]%></td>
             <td><%=proj.es[i] + proj.D[i]%></td>
             <td><%=proj.lf[i] - proj.D[i]%></td>
@@ -200,21 +200,6 @@
           );
 
         // here's the data defining the graph
-        // const jsonProj = <%- JSON.stringify(proj) %>;
-        // var nodeDataArray = [];
-        // for (var i = 0; i < jsonProj.n; i++) {
-        //   const newNode = { key: i, text: jsonProj.N[i], length: jsonProj.D[i], earlyStart: jsonProj.es[i], lateFinish: jsonProj.lf[i], critical: jsonProj.caBool[i] };
-        //   nodeDataArray.push(newNode);
-        // }
-        // var linkDataArray = [];
-        // for (var i = 0; i < jsonProj.n; i++) {
-        //   for (var j = i+1; j < jsonProj.n; j++) {
-        //     if (jsonProj.arcs[i][j] === 1) {
-        //       const newLink = { from: i, to: j };
-        //       linkDataArray.push(newLink);
-        //     }
-        //   }
-        // }
         var nodeDataArray = <%- JSON.stringify(proj.goNodes) %>;
         var linkDataArray = <%- JSON.stringify(proj.goLinks) %>;
         // var nodeDataArray = [
