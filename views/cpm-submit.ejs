@@ -1,0 +1,156 @@
+<%- include('partials/logHeader', {user: user}) %>
+
+<section class="exe-sec color2-sec">
+  <h2 class="sec-head sec-head-logbar-pt">Critical Path Method</h2>
+  <h2 class="pt-4">Project Data</h2>
+  <div class="container-fluid">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Activity</th>
+          <th scope="col">Duration</th>
+          <th scope="col">Predecessors</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < params.n; i++) { %>
+          <tr>
+            <th scope="row"><%=i+1%></th>
+            <td><%=params.N[i]%></td>
+            <td><%=proj.D[i]%></td>
+            <td><%=proj.pStr[i]%></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+  </div>
+</section>
+
+<section class="exe-sec color3-sec">
+  <h2 class="sec-head">CPM Questions</h2>
+  <div class="container-fluid">
+
+    <form class="" action="/cpm" method="POST">
+
+      <div style="text-align: left">
+        <h5>Question 1: Perform CPM Calculations, and fill in the table below.</h5>
+      </div>
+      <table class="table table-hover mt-4">
+        <thead>
+          <tr>
+            <th scope="col">Activity</th>
+            <th scope="col">EST</th>
+            <th scope="col">EFT</th>
+            <th scope="col">LST</th>
+            <th scope="col">LFT</th>
+            <th scope="col">Floats</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (var i = 0; i < params.n; i++) { %>
+            <tr>
+              <th scope="row"><%=i+1 + ". " + params.N[i]%></th>
+              <td><input type="number" name="est[]" class="form-control"></td>
+              <td><input type="number" name="eft[]" class="form-control"></td>
+              <td><input type="number" name="lst[]" class="form-control"></td>
+              <td><input type="number" name="lft[]" class="form-control"></td>
+              <td><input type="number" name="f[]" class="form-control"></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <div class="exe-mt" style="text-align: left">
+        <h5>Question 2: What is the total duration of the project?</h5>
+      </div>
+      <div class="input-group mt-2">
+        <input type="number" name="duration" class="form-control" placeholder="Project Duration" aria-label="project duration" aria-describedby="addon-wrapping">
+      </div>
+
+      <div class="exe-mt" style="text-align: left">
+        <h5>Question 4: How do you identify a critical path?</h5>
+      </div>
+      <%for (var i = 0; i < params.cpiOptions.length; i++) {%>
+        <div class="input-group mt-2">
+          <div class="input-group-text">
+            <input name="mcqCpi" class="form-check-input" type="radio" value="<%=i%>">
+          </div>
+          <span class="input-group-text"><%=params.cpiOptions[i]%></span>
+        </div>
+      <%}%>
+
+      <div class="exe-mt" style="text-align: left">
+        <h5>Question 3: How many critical paths exist in this project?</h5>
+      </div>
+      <% const optionNr = 4;
+      for (var i = 0; i < optionNr; i++) {%>
+        <div class="input-group mt-2">
+          <div class="input-group-text">
+            <input name="mcqCps" class="form-check-input" type="radio" value="<%=i+1%>">
+          </div>
+          <%if (i === optionNr - 1) {%>
+            <span class="input-group-text"><%=i+1%> or more</span>
+          <%} else {%>
+            <span class="input-group-text"><%=i+1%></span>
+          <%}%>
+        </div>
+      <%}%>
+
+      <div class="exe-mt" style="text-align: left">
+        <h5>Question 5: Select one critical path of your choice.</h5>
+      </div>
+      <div class="input-group mt-3">
+        <% for (var i = 0; i < params.n; i++) { %>
+          <div class="form-check form-check-inline">
+            <input name="mcqCp1[]" class="form-check-input" type="checkbox" id="mcqCp1[]" value="<%=i%>">
+            <label class="form-check-label" for="mcqCp1[]"><%=params.N[i]%></label>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="exe-mt" style="text-align: left">
+        <h5>Question 6: Select all the critical activities.</h5>
+      </div>
+      <div class="input-group mt-3">
+        <% for (var i = 0; i < params.n; i++) { %>
+          <div class="form-check form-check-inline">
+            <input name="mcqCa[]" class="form-check-input" type="checkbox" id="mcqCa[]" value="<%=i%>">
+            <label class="form-check-label" for="mcqCa[]"><%=params.N[i]%></label>
+          </div>
+        <%}%>
+      </div>
+
+      <div class="exe-mt">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-lg btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmModal">
+          CPM Submit
+        </button>
+      </div>
+
+      <!-- Modal -->
+      <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmModalLabel">Warning!</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Submitting your solution is irreversible. Make sure you have answered all the questions.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go back</button>
+              <button type="submit" class="btn btn-danger">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

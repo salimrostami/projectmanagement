@@ -50,7 +50,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #F38181;
 }
 
-/* RegLog */
+/* Register Login */
 .reglog{
   /* padding-top: 100px; */
   text-align: center;
@@ -59,17 +59,14 @@ h1, h2, h3, h4, h5, h6 {
   margin: auto;
 }
 
-/* CPM */
+/* Exercise Sections */
 .exe-sec{
   padding: 7% 10% 3%;
 }
-.exe-sec .sec-head{
+.sec-head-logbar-pt{
   padding: 5% 0 0;
 }
-.sol-sec{
-  padding: 7% 10% 3%;
-}
-.sol-table{
+.exe-mt{
   margin-top: 10%;
 }
 .timetable{
@@ -78,7 +75,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 5% auto 5%;
 }
 
-/*log header*/
+/*logged-in header*/
 .log-head-sec .container-fluid{
   padding: 0 15%;
 }
@@ -177,9 +174,6 @@ h1, h2, h3, h4, h5, h6 {
 .material-sec {
   padding: 7% 10%;
 }
-.material-sec .sec-head{
-  padding: 5% 0 0;
-}
 .material-flush-div{
   padding: 5% 0 0;
 }
@@ -245,4 +239,16 @@ h1, h2, h3, h4, h5, h6 {
     transform: rotate(0deg);
     position: static;
   }
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }

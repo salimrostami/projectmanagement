@@ -32,6 +32,13 @@ function paramsFunc(){
     hoursPerDay : 8,
     resNames : ["Technology", "Design", "Marketing"],
     resTypeNames : ["Junior", "Associate", "Senior"],
+    cpiSol: 1,
+    cpiOptions : [
+      "(A) A path of critical activities (zero floats)",
+      "(B) The longest path of the project",
+      "(C) A & B",
+      "(D) None of the above"
+    ]
   };
 
   return paramsObj;

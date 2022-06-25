@@ -7,11 +7,13 @@ const mongoose = require("mongoose");
 const session = require('express-session')
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-const cpm = require(__dirname + "/cpm.js");
+const exer = require(__dirname + "/exercise-gen.js");
 const paramsModule = require(__dirname + "/params.js");
 
-//global params
+//global params & project
 const params = paramsModule();
+const proj = exer();
+let cpmSol;
 
 //Set up the app
 const app = express();
@@ -39,20 +41,6 @@ async function main() {
 const studentSchema = new mongoose.Schema({
   email: String,
   password: String,
-});
-const activitySchema = new mongoose.Schema({
-  index: Number,
-  name: String,
-  duration: Number
-});
-const precedenceSchema = new mongoose.Schema({
-  from: Number,
-  to: Number
-});
-const projectSchema = new mongoose.Schema({
-  index: Number,
-  activities: [activitySchema],
-  precedences: [precedenceSchema]
 });
 
 // Modify the schema to use encryption/hashin strategies
@@ -113,8 +101,7 @@ app.get("/logout", function(req, res){
 
 app.get("/cpm", function(req, res){
   if (req.isAuthenticated()) {
-    const proj = cpm();
-    res.render("cpm", {proj: proj, params: params, user: req.user});
+    res.render("cpm-submit", {proj: proj, params: params, user: req.user});
   } else {
     res.redirect("/login");
   }
@@ -122,7 +109,6 @@ app.get("/cpm", function(req, res){
 
 app.get("/rl", function(req, res){
   if (req.isAuthenticated()) {
-    const proj = cpm();
     res.render("rl", {proj: proj, params: params, user: req.user});
   } else {
     res.redirect("/login");
@@ -131,7 +117,6 @@ app.get("/rl", function(req, res){
 
 app.get("/pert", function(req, res){
   if (req.isAuthenticated()) {
-    const proj = cpm();
     res.render("pert", {proj: proj, params: params, user: req.user});
   } else {
     res.redirect("/login");
@@ -140,7 +125,6 @@ app.get("/pert", function(req, res){
 
 app.get("/msp", function(req, res){
   if (req.isAuthenticated()) {
-    const proj = cpm();
     res.render("msp", {proj: proj, params: params, user: req.user});
   } else {
     res.redirect("/login");
@@ -166,13 +150,23 @@ app.post("/register", function(req, res){
         res.redirect("/content");
       })
     }
-  })
+  });
 });
 
 app.post("/login",
   passport.authenticate("local", { failureRedirect: "/login" }),
   function(req, res) {
     res.redirect("/content");
+});
+
+app.post("/cpm", function(req, res){
+  if (req.isAuthenticated()) {
+    cpmSol = req.body;
+    console.log(cpmSol);
+    res.render("cpm", {proj: proj, sol: cpmSol, params: params, user: req.user});
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // Set up the app port
