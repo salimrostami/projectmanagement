@@ -26,92 +26,6 @@
   </div>
 </section>
 
-<%
-let myColor = "#32CD32"
-function cpmCell(input, key){
-  if ((input == "") || (typeof input === 'undefined')) {
-    return "<td><span style='color: red;'> &#10006 &nbsp &nbsp</span>" + key + "</td>";
-  } else if (input == key) {
-    return "<td><span style='color: " + myColor + ";'>" + key + "</span></td>";
-  } else {
-    return "<td><span style='color: red;'><s>" + input + "</s>&nbsp &nbsp</span>" + key + "</td>";
-  }
-}
-function cpsCell(input, key){
-  if ((input == "") || (typeof input === 'undefined')) {
-    return "<td colspan='3'><span style='color: red;'> &#10006 &nbsp &nbsp</span>" + key + "</td>";
-  } else if (input == key) {
-    return "<td colspan='3'><span style='color: " + myColor + ";'>" + key + "</span></td>";
-  } else {
-    return "<td colspan='3'><span style='color: red;'><s>" + input + "</s>&nbsp &nbsp</span>" + key + "</td>";
-  }
-}
-function cpiCell(input){
-  if ((input == "") || (typeof input === 'undefined')) {
-    return "<td><span style='color: red;'> &#10006 &nbsp &nbsp</span>" + params.cpiOptions[params.cpiSol] + "</td>";
-  } else if (input == params.cpiSol) {
-    return "<td><span style='color: " + myColor + ";'>&#10004 &nbsp &nbsp" + params.cpiOptions[params.cpiSol] + "</span></td>";
-  } else {
-    return "<td><span style='color: red;'><s>" + params.cpiOptions[input] + "</s>&nbsp &nbsp</span>" + params.cpiOptions[params.cpiSol] + "</td>";
-  }
-}
-function cp1Cell(){
-  if (typeof sol.mcqCp1 == 'undefined') {
-    return "<td><span style='color: red;'> &#10006</span></td>";
-  }
-  if (sol.mcqCp1 == null) {
-    return "<td><span style='color: red;'> &#10006</span></td>";
-  }
-  let cpStr = "";
-  let cpArr = [];
-  for (var i = 0; i < sol.mcqCp1.length; i++) {
-     if (typeof sol.mcqCp1[i] !== 'undefined') {
-       cpArr.push(sol.mcqCp1[i]);
-       if (cpStr === "") {
-         cpStr = cpStr + params.N[sol.mcqCp1[i]];
-       } else {
-         cpStr = cpStr + "-" + params.N[sol.mcqCp1[i]];
-       }
-     }
-  }
-  if (cpStr === "") {
-    return "<td><span style='color: red;'> &#10006</span></td>";
-  } else {
-    let cpExist = false;
-    for (var i = 0; i < proj.cpNr; i++) {
-      if (cpArr.toString() === proj.cps[i].toString()) {
-        cpExist = true;
-        break;
-      }
-    }
-    if (cpExist) {
-      return "<td><span style='color: " + myColor + ";'>&#10004 &nbsp &nbsp" + cpStr + "</span></td>";
-    } else {
-      return "<td><span style='color: red;'><s>" + cpStr + "</s>&nbsp &nbsp</span></td>";
-    }
-  }
-}
-function cpaCell(input){
-  if (typeof sol.mcqCa == 'undefined') {
-    return "<td><span style='color: red;'> &#10006</span></td>";
-  }
-  if (sol.mcqCa == null) {
-    return "<td><span style='color: red;'> &#10006</span></td>";
-  }
-  if ((!sol.mcqCa.includes(input.toString())) && (!proj.caBool[input])) {
-    return "<td><span style='color: " + myColor + ";'>No</span></td>";
-  } else if (sol.mcqCa.includes(input.toString()) && (proj.caBool[input])) {
-    return "<td><span style='color: " + myColor + ";'>Yes</span></td>";
-  } else if (sol.mcqCa.includes(input.toString()) && (!proj.caBool[input])) {
-    return "<td><span style='color: red;'><s>Yes</s></span></td>";
-  } else if ((!sol.mcqCa.includes(input.toString())) && (proj.caBool[input])) {
-    return "<td><span style='color: red;'><s>No</s></span></td>";
-  } else {
-    return "Error!"
-  }
-}
-%>
-
 <section class="exe-sec color3-sec">
   <h2 class="sec-head">CPM Solution</h2>
   <div class="container-fluid">
@@ -177,7 +91,7 @@ function cpaCell(input){
       </thead>
       <tbody>
         <tr>
-          <%- cpsCell(sol.mcqCps, proj.cpNr);%>
+          <%- cpsCell(sol.mcqCps+1, proj.cpNr);%>
         </tr>
         <tr>
           <th scope="col">#</th>
@@ -202,7 +116,7 @@ function cpaCell(input){
       </thead>
       <tbody>
         <tr>
-          <%- cp1Cell();%>
+          <%- cp1Cell(sol.mcqCp1);%>
         </tr>
       </tbody>
     </table>
@@ -223,7 +137,7 @@ function cpaCell(input){
         <tr>
           <th scope="col" style="text-align: right;">Critical:</th>
           <% for (var i = 0; i < params.n; i++) {%>
-            <%- cpaCell(i)%>
+            <%- cpaCell(sol.mcqCa, i)%>
           <%}%>
         </tr>
       </tbody>

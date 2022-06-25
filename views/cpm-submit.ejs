@@ -1,5 +1,7 @@
 <%- include('partials/logHeader', {user: user}) %>
 
+<%- include('functions') %>
+
 <section class="exe-sec color2-sec">
   <h2 class="sec-head sec-head-logbar-pt">Critical Path Method</h2>
   <h2 class="pt-4">Project Data</h2>
@@ -32,7 +34,7 @@
   <h2 class="sec-head">CPM Questions</h2>
   <div class="container-fluid">
 
-    <form class="" action="/cpm" method="POST">
+    <form action="/cpm" method="POST" onkeydown="return event.key != 'Enter';">
 
       <div style="text-align: left">
         <h5>Question 1: Perform CPM Calculations, and fill in the table below.</h5>
@@ -66,37 +68,18 @@
         <h5>Question 2: What is the total duration of the project?</h5>
       </div>
       <div class="input-group mt-2">
-        <input type="number" name="duration" class="form-control" placeholder="Project Duration" aria-label="project duration" aria-describedby="addon-wrapping">
+        <input type="number" name="duration" class="form-control" placeholder="Project Duration">
       </div>
 
-      <div class="exe-mt" style="text-align: left">
-        <h5>Question 4: How do you identify a critical path?</h5>
+      <!-- Q3 -->
+      <div class="exe-mt">
+        <%- mcq1(3, params.cpiName, params.cpiQuestion, params.cpiOptions); %>
       </div>
-      <%for (var i = 0; i < params.cpiOptions.length; i++) {%>
-        <div class="input-group mt-2">
-          <div class="input-group-text">
-            <input name="mcqCpi" class="form-check-input" type="radio" value="<%=i%>">
-          </div>
-          <span class="input-group-text"><%=params.cpiOptions[i]%></span>
-        </div>
-      <%}%>
 
-      <div class="exe-mt" style="text-align: left">
-        <h5>Question 3: How many critical paths exist in this project?</h5>
+      <!-- Q4 -->
+      <div class="exe-mt">
+        <%- mcq1(4, params.cpsName, params.cpsQuestion, params.cpsOptions); %>
       </div>
-      <% const optionNr = 4;
-      for (var i = 0; i < optionNr; i++) {%>
-        <div class="input-group mt-2">
-          <div class="input-group-text">
-            <input name="mcqCps" class="form-check-input" type="radio" value="<%=i+1%>">
-          </div>
-          <%if (i === optionNr - 1) {%>
-            <span class="input-group-text"><%=i+1%> or more</span>
-          <%} else {%>
-            <span class="input-group-text"><%=i+1%></span>
-          <%}%>
-        </div>
-      <%}%>
 
       <div class="exe-mt" style="text-align: left">
         <h5>Question 5: Select one critical path of your choice.</h5>

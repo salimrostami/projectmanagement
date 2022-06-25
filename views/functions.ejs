@@ -1,0 +1,103 @@
+<%
+
+let myColor = "#32CD32"
+cpmCell = function(input, key){
+  if ((input == "") || (typeof input === 'undefined')) {
+    return "<td><span style='color: red;'> &#10006 &nbsp &nbsp</span>" + key + "</td>";
+  } else if (input == key) {
+    return "<td><span style='color: " + myColor + ";'>" + key + "</span></td>";
+  } else {
+    return "<td><span style='color: red;'><s>" + input + "</s>&nbsp &nbsp</span>" + key + "</td>";
+  }
+}
+cpiCell = function(input){
+  if ((input == "") || (typeof input === 'undefined')) {
+    return "<td><span style='color: red;'> &#10006 &nbsp &nbsp</span>" + params.cpiOptions[params.cpiSol] + "</td>";
+  } else if (input == params.cpiSol) {
+    return "<td><span style='color: " + myColor + ";'>&#10004 &nbsp &nbsp" + params.cpiOptions[params.cpiSol] + "</span></td>";
+  } else {
+    return "<td><span style='color: red;'><s>" + params.cpiOptions[input] + "</s>&nbsp &nbsp</span>" + params.cpiOptions[params.cpiSol] + "</td>";
+  }
+}
+cpsCell = function(input, key){
+  if ((input == "") || (typeof input === 'undefined')) {
+    return "<td colspan='3'><span style='color: red;'> &#10006 &nbsp &nbsp</span>" + key + "</td>";
+  } else if (input == key) {
+    return "<td colspan='3'><span style='color: " + myColor + ";'>" + key + "</span></td>";
+  } else {
+    return "<td colspan='3'><span style='color: red;'><s>" + input + "</s>&nbsp &nbsp</span>" + key + "</td>";
+  }
+}
+cp1Cell = function(input){
+  if (typeof input == 'undefined') {
+    return "<td><span style='color: red;'> &#10006</span></td>";
+  }
+  if (input == null) {
+    return "<td><span style='color: red;'> &#10006</span></td>";
+  }
+  let cpStr = "";
+  let cpArr = [];
+  for (var i = 0; i < input.length; i++) {
+     if (typeof input[i] !== 'undefined') {
+       cpArr.push(input[i]);
+       if (cpStr === "") {
+         cpStr = cpStr + params.N[input[i]];
+       } else {
+         cpStr = cpStr + "-" + params.N[input[i]];
+       }
+     }
+  }
+  if (cpStr === "") {
+    return "<td><span style='color: red;'> &#10006</span></td>";
+  } else {
+    let cpExist = false;
+    for (var i = 0; i < proj.cpNr; i++) {
+      if (cpArr.toString() === proj.cps[i].toString()) {
+        cpExist = true;
+        break;
+      }
+    }
+    if (cpExist) {
+      return "<td><span style='color: " + myColor + ";'>&#10004 &nbsp &nbsp" + cpStr + "</span></td>";
+    } else {
+      return "<td><span style='color: red;'><s>" + cpStr + "</s>&nbsp &nbsp</span></td>";
+    }
+  }
+}
+cpaCell = function(input, job){
+  if (typeof input == 'undefined') {
+    return "<td><span style='color: red;'> &#10006</span></td>";
+  }
+  if (input == null) {
+    return "<td><span style='color: red;'> &#10006</span></td>";
+  }
+  if ((!input.includes(job.toString())) && (!proj.caBool[job])) {
+    return "<td><span style='color: " + myColor + ";'>No</span></td>";
+  } else if (input.includes(job.toString()) && (proj.caBool[job])) {
+    return "<td><span style='color: " + myColor + ";'>Yes</span></td>";
+  } else if (input.includes(job.toString()) && (!proj.caBool[job])) {
+    return "<td><span style='color: red;'><s>Yes</s></span></td>";
+  } else if ((!input.includes(job.toString())) && (proj.caBool[job])) {
+    return "<td><span style='color: red;'><s>No</s></span></td>";
+  } else {
+    return "Error!"
+  }
+}
+
+mcq1 = function(nr, name, quest, options){
+  let x = "";
+  x += "<div style='text-align: left'>";
+    x += "<h5> Question " + nr  + ": " + quest + "</h5>";
+  x += "</div>";
+  for (var i = 0; i < options.length; i++) {
+    x += "<div class='input-group mt-2'>";
+      x += "<div class='input-group-text'>";
+        x += "<input name='" + name + "' class='form-check-input' type='radio' value=" + i + ">";
+      x += "</div>";
+      x += "<span class='input-group-text'>" + options[i] + "</span>";
+    x += "</div>";
+  }
+  return x;
+}
+
+%>

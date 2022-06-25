@@ -32,12 +32,22 @@ function paramsFunc(){
     hoursPerDay : 8,
     resNames : ["Technology", "Design", "Marketing"],
     resTypeNames : ["Junior", "Associate", "Senior"],
-    cpiSol: 1,
+    cpiName: "mcqCpi",
+    cpiQuestion: "How do you identify a critical path?",
     cpiOptions : [
       "(A) A path of critical activities (zero floats)",
       "(B) The longest path of the project",
       "(C) A & B",
       "(D) None of the above"
+    ],
+    cpiSol: 1,
+    cpsName: "mcqCps",
+    cpsQuestion: "How many critical paths exist in the project?",
+    cpsOptions : [
+      "1",
+      "2",
+      "3",
+      "4 or more"
     ]
   };
 
