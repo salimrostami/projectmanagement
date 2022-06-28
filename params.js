@@ -40,15 +40,7 @@ function paramsFunc(){
       "(C) A & B",
       "(D) None of the above"
     ],
-    cpiSol: 1,
-    cpsName: "mcqCps",
-    cpsQuestion: "How many critical paths exist in the project?",
-    cpsOptions : [
-      "1",
-      "2",
-      "3",
-      "4 or more"
-    ]
+    cpiSol: 1
   };
 
   return paramsObj;
